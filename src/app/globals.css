@@ -9,7 +9,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-display);
   --color-brand-primary: var(--brand-primary);
   --color-brand-primary-foreground: var(--brand-primary-foreground);
   --color-brand-accent: var(--brand-accent);
@@ -149,6 +149,11 @@
   }
   html {
     @apply font-sans scroll-smooth;
+  }
+  /* Display face for all headings — Sora, slightly tightened */
+  h1, h2, h3, h4 {
+    @apply font-heading;
+    letter-spacing: -0.01em;
   }
   ::selection {
     background: var(--brand-primary);

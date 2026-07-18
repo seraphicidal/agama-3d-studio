@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { useTheme } from "next-themes"
 import { motion, useScroll, useMotionValueEvent } from "framer-motion"
 import {
@@ -35,6 +36,7 @@ const navItems = [
 export function Header() {
   const [scrolled, setScrolled] = React.useState(false)
   const [mounted, setMounted] = React.useState(false)
+  const pathname = usePathname()
   const { scrollY } = useScroll()
   const { theme, setTheme } = useTheme()
   const setSearchOpen = useUIStore((s) => s.setSearchOpen)
@@ -75,15 +77,22 @@ export function Header() {
             <Logo />
 
             <nav className="hidden items-center gap-1 rounded-full border border-border/0 lg:flex">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="rounded-full px-3.5 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-secondary hover:text-foreground"
-                >
-                  {item.label}
-                </Link>
-              ))}
+              {navItems.map((item) => {
+                const active = pathname === item.href
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={active ? "page" : undefined}
+                    className={cn(
+                      "rounded-full px-3.5 py-2 text-sm font-medium transition-colors hover:bg-secondary hover:text-foreground",
+                      active ? "bg-secondary text-foreground" : "text-foreground/80"
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                )
+              })}
             </nav>
 
             <div className="flex items-center gap-1">
@@ -92,7 +101,6 @@ export function Header() {
                 size="icon"
                 aria-label={dict.nav.search}
                 onClick={() => setSearchOpen(true)}
-                className="hidden sm:inline-flex"
               >
                 <Search className="size-[18px]" />
               </Button>
@@ -101,7 +109,7 @@ export function Header() {
                 size="icon"
                 aria-label={dict.nav.wishlist}
                 className="relative hidden sm:inline-flex"
-                render={<Link href="/ucet?tab=wishlist" />}
+                render={<Link href="/oblubene" />}
                 nativeButton={false}
               >
                 <Heart className="size-[18px]" />

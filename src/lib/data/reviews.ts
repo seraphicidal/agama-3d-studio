@@ -1,4 +1,5 @@
 import type { Review } from "@/lib/types"
+import { MOCK_NOW } from "./products"
 import { reviewAvatar, testimonialPhoto } from "./images"
 
 const names = [
@@ -26,7 +27,7 @@ function buildReviews(productId: string, count: number): Review[] {
       author: name,
       avatar: reviewAvatar(`${productId}-${i}`),
       rating: i % 5 === 0 ? 4 : 5,
-      date: new Date(Date.now() - (i + 1) * 9 * 86400000).toISOString(),
+      date: new Date(MOCK_NOW - (i + 1) * 9 * 86400000).toISOString(),
       title: c.title,
       comment: c.comment,
       verified: true,

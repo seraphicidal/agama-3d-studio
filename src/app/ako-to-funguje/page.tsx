@@ -54,7 +54,7 @@ export default function HowItWorksPage() {
           </LinkButton>
         </section>
 
-        <section className="space-y-8 rounded-3xl bg-brand-dark p-8 text-white sm:p-12">
+        <section className="space-y-8 rounded-3xl bg-brand-dark p-8 text-white sm:p-12 dark:bg-card dark:ring-1 dark:ring-white/10">
           <h2 className="text-2xl font-semibold">Zákazková výroba</h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {customSteps.map((s, i) => (
