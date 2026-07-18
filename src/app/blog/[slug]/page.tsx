@@ -2,8 +2,10 @@ import { notFound } from "next/navigation"
 import NextImage from "next/image"
 import Link from "next/link"
 import { Container } from "@/components/container"
+import { JsonLd } from "@/components/json-ld"
 import { blogPosts, getBlogPostBySlug } from "@/lib/data/blog"
 import { formatDate } from "@/lib/format"
+import { SITE_URL, SITE_NAME } from "@/lib/site"
 
 export function generateStaticParams() {
   return blogPosts.map((p) => ({ slug: p.slug }))
@@ -17,7 +19,17 @@ export async function generateMetadata({
   const { slug } = await params
   const post = getBlogPostBySlug(slug)
   if (!post) return {}
-  return { title: post.title, description: post.excerpt }
+  return {
+    title: post.title,
+    description: post.excerpt,
+    alternates: { canonical: `/blog/${post.slug}` },
+    openGraph: {
+      type: "article",
+      title: post.title,
+      description: post.excerpt,
+      images: [{ url: post.coverImage, width: 1200, height: 800 }],
+    },
+  }
 }
 
 export default async function BlogPostPage({
@@ -31,8 +43,22 @@ export default async function BlogPostPage({
 
   const others = blogPosts.filter((p) => p.id !== post.id).slice(0, 3)
 
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.excerpt,
+    image: [post.coverImage],
+    datePublished: post.date,
+    inLanguage: "sk",
+    author: { "@type": "Person", name: post.author },
+    publisher: { "@type": "Organization", name: SITE_NAME },
+    mainEntityOfPage: `${SITE_URL}/blog/${post.slug}`,
+  }
+
   return (
     <div className="py-12 sm:py-16">
+      <JsonLd data={articleJsonLd} />
       <Container className="max-w-3xl space-y-8">
         <div className="space-y-4">
           <Link href="/blog" className="text-sm font-medium text-brand-primary hover:underline">

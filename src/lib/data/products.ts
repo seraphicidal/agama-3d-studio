@@ -22,6 +22,12 @@ const COLORS = {
   ],
 }
 
+// Fixed anchor for all relative mock dates. Using Date.now() here caused a real
+// hydration bug: this module evaluates in both the server and client bundles, and
+// products sharing the same `daysAgo` (e.g. two at 60) flipped sort order whenever
+// the two evaluations landed across a millisecond boundary.
+export const MOCK_NOW = Date.parse("2026-07-18T12:00:00Z")
+
 interface ProductSeed {
   id: string
   name: string
@@ -94,7 +100,7 @@ function buildProduct(seed: ProductSeed): Product {
       { label: "Podpory", value: "Áno, organické" },
       { label: "Post-processing", value: "Brúsenie, základový náter" },
     ],
-    createdAt: new Date(Date.now() - seed.daysAgo * 86400000).toISOString(),
+    createdAt: new Date(MOCK_NOW - seed.daysAgo * 86400000).toISOString(),
   }
 }
 
@@ -681,4 +687,48 @@ export function getNewArrivals() {
 
 export function getFeaturedProducts() {
   return products.filter((p) => p.featured)
+}
+
+export type ProductSort =
+  | "newest"
+  | "popular"
+  | "rating"
+  | "price-asc"
+  | "price-desc"
+  | "alpha"
+
+export interface ProductQuery {
+  categoryId?: string
+  q?: string
+  sort?: ProductSort
+  limit?: number
+}
+
+// Single query seam shared by the API routes (and later the real DB layer —
+// swap the body for a Supabase query without touching callers).
+export function queryProducts({ categoryId, q, sort = "newest", limit }: ProductQuery) {
+  let list = products.filter((p) => {
+    if (categoryId && !p.categoryIds.includes(categoryId)) return false
+    if (q && !p.name.toLowerCase().includes(q.toLowerCase())) return false
+    return true
+  })
+
+  list = [...list].sort((a, b) => {
+    switch (sort) {
+      case "popular":
+        return b.reviewCount - a.reviewCount
+      case "rating":
+        return b.rating - a.rating
+      case "price-asc":
+        return a.price.amount - b.price.amount
+      case "price-desc":
+        return b.price.amount - a.price.amount
+      case "alpha":
+        return a.name.localeCompare(b.name)
+      default:
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    }
+  })
+
+  return typeof limit === "number" ? list.slice(0, Math.max(0, limit)) : list
 }

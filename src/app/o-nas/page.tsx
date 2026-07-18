@@ -40,7 +40,7 @@ export default function AboutPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 rounded-3xl bg-brand-dark p-8 text-white sm:p-12 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 rounded-3xl bg-brand-dark p-8 text-white sm:p-12 lg:grid-cols-2 dark:bg-card dark:ring-1 dark:ring-white/10">
           <div>
             <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-accent">
               Naša misia

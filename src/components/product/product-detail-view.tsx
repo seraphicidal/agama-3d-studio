@@ -7,12 +7,10 @@ import { toast } from "sonner"
 import {
   Heart,
   Share2,
-  Minus,
-  Plus,
   Truck,
   Clock,
   ShieldCheck,
-  RotateCw,
+  Rotate3d,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
@@ -25,6 +23,9 @@ import { Container } from "@/components/container"
 import { RatingStars } from "@/components/rating-stars"
 import { ProductCard } from "@/components/product/product-card"
 import { SectionHeading } from "@/components/section-heading"
+import { QuantityStepper } from "@/components/quantity-stepper"
+import { ModelViewerLazy } from "@/components/three/model-viewer-lazy"
+import type { ModelVariant } from "@/components/three/model-viewer"
 import type { Product, Review } from "@/lib/types"
 import { formatPrice, formatDate } from "@/lib/format"
 import { useCartStore } from "@/store/cart-store"
@@ -33,6 +34,15 @@ import { useUIStore } from "@/store/ui-store"
 import { getCreatorById } from "@/lib/data/creators"
 import { dict } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
+
+function variantForProduct(product: Product): ModelVariant {
+  const ids = product.categoryIds
+  if (ids.some((c) => ["prototypes", "replacement-parts", "stl-printing"].includes(c)))
+    return "gem"
+  if (ids.some((c) => ["home-decor", "desk-accessories", "keychains"].includes(c)))
+    return "vase"
+  return "knot"
+}
 
 export function ProductDetailView({
   product,
@@ -69,7 +79,7 @@ export function ProductDetailView({
       color: color.name,
       size,
     })
-    toast.success(`${product.name} pridané do košíka`)
+    toast.success(`${product.name} ${dict.common.addedToCart}`)
     setCartOpen(true)
   }
 
@@ -78,7 +88,7 @@ export function ProductDetailView({
       navigator.share({ title: product.name, url: window.location.href }).catch(() => {})
     } else if (typeof navigator !== "undefined") {
       navigator.clipboard?.writeText(window.location.href)
-      toast.success("Odkaz skopírovaný")
+      toast.success(dict.common.linkCopied)
     }
   }
 
@@ -106,16 +116,17 @@ export function ProductDetailView({
           <div className="space-y-3">
             <div className="group relative aspect-square overflow-hidden rounded-2xl bg-secondary">
               {view360 ? (
-                <div className="flex h-full flex-col items-center justify-center gap-3 bg-brand-dark text-white">
-                  <RotateCw className="size-8 animate-spin text-brand-accent [animation-duration:2.5s]" />
-                  <p className="text-sm font-medium">360° náhľad modelu</p>
-                  <p className="max-w-xs text-center text-xs text-white/60">
-                    Interaktívny 360° prehliadač bude čoskoro dostupný pre tento model.
-                  </p>
-                  <Button variant="outline" size="sm" className="mt-1 border-white/25 text-white hover:bg-white/10" onClick={() => setView360(false)}>
-                    Späť na fotografie
+                <>
+                  <ModelViewerLazy variant={variantForProduct(product)} />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="absolute left-3 bottom-3 z-10 bg-background/90 backdrop-blur-sm sm:left-auto sm:right-24"
+                    onClick={() => setView360(false)}
+                  >
+                    {dict.viewer.backToPhotos}
                   </Button>
-                </div>
+                </>
               ) : (
                 <>
                   <Image
@@ -144,8 +155,8 @@ export function ProductDetailView({
                     className="absolute bottom-3 right-3 bg-background/90 backdrop-blur-sm"
                     onClick={() => setView360(true)}
                   >
-                    <RotateCw className="size-3.5" />
-                    360°
+                    <Rotate3d className="size-3.5" />
+                    3D
                   </Button>
                 </>
               )}
@@ -281,21 +292,7 @@ export function ProductDetailView({
             <Separator />
 
             <div className="flex items-center gap-3">
-              <div className="flex items-center rounded-full border border-border">
-                <button
-                  className="flex size-11 items-center justify-center hover:bg-secondary"
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                >
-                  <Minus className="size-4" />
-                </button>
-                <span className="w-8 text-center font-medium">{quantity}</span>
-                <button
-                  className="flex size-11 items-center justify-center hover:bg-secondary"
-                  onClick={() => setQuantity((q) => q + 1)}
-                >
-                  <Plus className="size-4" />
-                </button>
-              </div>
+              <QuantityStepper value={quantity} onChange={setQuantity} />
               <Button
                 size="lg"
                 className="h-11 flex-1 rounded-full bg-brand-primary text-brand-primary-foreground hover:bg-brand-accent"

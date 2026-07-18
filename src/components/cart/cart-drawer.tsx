@@ -1,9 +1,11 @@
 "use client"
 
+import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { AnimatePresence, motion } from "framer-motion"
-import { Minus, Plus, X, ShoppingBag, Truck } from "lucide-react"
+import { toast } from "sonner"
+import { X, ShoppingBag, Truck, TicketPercent } from "lucide-react"
 import {
   Sheet,
   SheetContent,
@@ -13,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
+import { QuantityStepper } from "@/components/quantity-stepper"
 import { useUIStore } from "@/store/ui-store"
 import { useCartStore } from "@/store/cart-store"
 import { formatPrice } from "@/lib/format"
@@ -27,6 +30,23 @@ export function CartDrawer() {
   const updateQuantity = useCartStore((s) => s.updateQuantity)
   const removeItem = useCartStore((s) => s.removeItem)
   const subtotal = useCartStore((s) => s.subtotal())
+  const couponCode = useCartStore((s) => s.couponCode)
+  const applyCoupon = useCartStore((s) => s.applyCoupon)
+  const removeCoupon = useCartStore((s) => s.removeCoupon)
+  const discountAmount = useCartStore((s) => s.discountAmount())
+  const discountRate = useCartStore((s) => s.discountRate())
+
+  const [couponInput, setCouponInput] = React.useState("")
+
+  function handleApplyCoupon() {
+    if (!couponInput.trim()) return
+    if (applyCoupon(couponInput)) {
+      toast.success(dict.cart.couponApplied)
+      setCouponInput("")
+    } else {
+      toast.error(dict.cart.couponInvalid)
+    }
+  }
 
   const recommended = products.slice(0, 3)
 
@@ -94,6 +114,7 @@ export function CartDrawer() {
                         </Link>
                         <button
                           onClick={() => removeItem(item.id)}
+                          aria-label={dict.common.remove}
                           className="text-muted-foreground hover:text-destructive"
                         >
                           <X className="size-4" />
@@ -103,27 +124,11 @@ export function CartDrawer() {
                         {item.material} · {item.color} · {item.size}
                       </p>
                       <div className="mt-1 flex items-center justify-between">
-                        <div className="flex items-center gap-1 rounded-full border border-border">
-                          <button
-                            className="flex size-6 items-center justify-center rounded-full hover:bg-secondary"
-                            onClick={() =>
-                              updateQuantity(item.id, item.quantity - 1)
-                            }
-                          >
-                            <Minus className="size-3" />
-                          </button>
-                          <span className="w-5 text-center text-xs font-medium">
-                            {item.quantity}
-                          </span>
-                          <button
-                            className="flex size-6 items-center justify-center rounded-full hover:bg-secondary"
-                            onClick={() =>
-                              updateQuantity(item.id, item.quantity + 1)
-                            }
-                          >
-                            <Plus className="size-3" />
-                          </button>
-                        </div>
+                        <QuantityStepper
+                          value={item.quantity}
+                          onChange={(q) => updateQuantity(item.id, q)}
+                          size="sm"
+                        />
                         <span className="text-sm font-semibold">
                           {formatPrice({
                             amount: item.price.amount * item.quantity,
@@ -147,22 +152,59 @@ export function CartDrawer() {
             </div>
 
             <div className="space-y-4 border-t border-border p-4">
-              <div className="flex gap-2">
-                <Input placeholder={dict.cart.coupon} className="h-9" />
-                <Button variant="outline" size="sm" className="h-9 shrink-0">
-                  {dict.cart.applyCoupon}
-                </Button>
-              </div>
+              {couponCode ? (
+                <div className="flex items-center justify-between rounded-xl bg-brand-primary/10 px-3 py-2">
+                  <span className="flex items-center gap-1.5 text-sm font-medium text-brand-primary">
+                    <TicketPercent className="size-4" />
+                    {couponCode} (−{Math.round(discountRate * 100)} %)
+                  </span>
+                  <button
+                    onClick={removeCoupon}
+                    aria-label={dict.common.remove}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <Input
+                    placeholder={dict.cart.coupon}
+                    className="h-9"
+                    value={couponInput}
+                    onChange={(e) => setCouponInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleApplyCoupon()}
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-9 shrink-0"
+                    onClick={handleApplyCoupon}
+                  >
+                    {dict.cart.applyCoupon}
+                  </Button>
+                </div>
+              )}
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Truck className="size-3.5" />
-                {subtotal >= 60 ? dict.common.freeShipping : "Doprava vypočítaná pri pokladni"}
+                {subtotal >= 60 ? dict.common.freeShipping : dict.cart.shippingAtCheckout}
               </div>
               <Separator />
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">{dict.cart.subtotal}</span>
-                <span className="font-semibold">
-                  {formatPrice({ amount: subtotal, currency: "EUR" })}
-                </span>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{dict.cart.subtotal}</span>
+                  <span className="font-semibold">
+                    {formatPrice({ amount: subtotal, currency: "EUR" })}
+                  </span>
+                </div>
+                {discountAmount > 0 && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">{dict.cart.discount}</span>
+                    <span className="font-semibold text-brand-primary">
+                      −{formatPrice({ amount: discountAmount, currency: "EUR" })}
+                    </span>
+                  </div>
+                )}
               </div>
               <Button
                 size="lg"

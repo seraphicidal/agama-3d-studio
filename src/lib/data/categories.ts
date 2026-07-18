@@ -127,3 +127,7 @@ export const categories: Category[] = [
 export function getCategoryBySlug(slug: string) {
   return categories.find((c) => c.slug === slug)
 }
+
+export function getCategoryById(id: string) {
+  return categories.find((c) => c.id === id)
+}

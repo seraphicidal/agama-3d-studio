@@ -18,7 +18,7 @@ export function MobileBottomNav() {
   const items = [
     { href: "/", label: dict.nav.home, icon: Home },
     { href: "/modely", label: dict.nav.models, icon: LayoutGrid },
-    { href: "/ucet?tab=wishlist", label: dict.nav.wishlist, icon: Heart, badge: wishlistCount },
+    { href: "/oblubene", label: dict.nav.wishlist, icon: Heart, badge: wishlistCount },
     { href: "/ucet", label: dict.nav.account, icon: User },
   ]
 
@@ -31,6 +31,7 @@ export function MobileBottomNav() {
           <Link
             key={item.href}
             href={item.href}
+            aria-current={active ? "page" : undefined}
             className={cn(
               "relative flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 text-[10px] font-medium",
               active ? "text-brand-primary" : "text-muted-foreground"

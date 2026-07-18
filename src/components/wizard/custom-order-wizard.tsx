@@ -6,8 +6,6 @@ import {
   UploadCloud,
   FileBox,
   X,
-  Minus,
-  Plus,
   CheckCircle2,
   Truck,
   Store,
@@ -17,19 +15,21 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Stepper } from "@/components/wizard/stepper"
+import { QuantityStepper } from "@/components/quantity-stepper"
 import { materials } from "@/lib/data/materials"
 import type { MaterialId } from "@/lib/types"
 import { formatPrice } from "@/lib/format"
+import { dict } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 
 const STEPS = [
-  "Nahratie súboru",
-  "Materiál",
-  "Farba",
-  "Výška vrstvy",
-  "Množstvo",
-  "Doprava",
-  "Súhrn",
+  dict.wizard.steps.upload,
+  dict.wizard.steps.material,
+  dict.wizard.steps.color,
+  dict.wizard.steps.layer,
+  dict.wizard.steps.quantity,
+  dict.wizard.steps.shipping,
+  dict.wizard.steps.summary,
 ]
 
 const MATERIAL_BASE: Record<MaterialId, number> = {
@@ -65,6 +65,8 @@ const SHIPPING_METHODS = [
   { id: "pickup", label: "Osobný odber", desc: "Bratislava, Zlatnícka 12", price: 0, icon: Store },
 ]
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 interface WizardState {
   file: { name: string; size: number } | null
   material: MaterialId
@@ -79,6 +81,8 @@ interface WizardState {
   postalCode: string
 }
 
+type ContactErrors = Partial<Record<"name" | "email" | "address" | "city" | "postalCode", string>>
+
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
@@ -89,6 +93,7 @@ export function CustomOrderWizard() {
   const [step, setStep] = React.useState(0)
   const [dragActive, setDragActive] = React.useState(false)
   const [submitted, setSubmitted] = React.useState(false)
+  const [errors, setErrors] = React.useState<ContactErrors>({})
   const fileInputRef = React.useRef<HTMLInputElement>(null)
 
   const [state, setState] = React.useState<WizardState>({
@@ -112,6 +117,20 @@ export function CustomOrderWizard() {
 
   function update<K extends keyof WizardState>(key: K, value: WizardState[K]) {
     setState((s) => ({ ...s, [key]: value }))
+    if (key in errors) setErrors((e) => ({ ...e, [key]: undefined }))
+  }
+
+  function validateContact(): ContactErrors {
+    const next: ContactErrors = {}
+    if (!state.name.trim()) next.name = dict.validation.required
+    if (!state.email.trim()) next.email = dict.validation.required
+    else if (!EMAIL_RE.test(state.email)) next.email = dict.validation.invalidEmail
+    if (state.shippingMethod.id === "courier") {
+      if (!state.address.trim()) next.address = dict.validation.required
+      if (!state.city.trim()) next.city = dict.validation.required
+      if (!state.postalCode.trim()) next.postalCode = dict.validation.required
+    }
+    return next
   }
 
   function handleFiles(files: FileList | null) {
@@ -119,16 +138,21 @@ export function CustomOrderWizard() {
     if (!file) return
     const ext = file.name.split(".").pop()?.toLowerCase()
     if (!["stl", "obj", "3mf"].includes(ext ?? "")) {
-      toast.error("Podporované formáty: STL, OBJ, 3MF")
+      toast.error(dict.wizard.invalidFormat)
       return
     }
     update("file", { name: file.name, size: file.size })
-    toast.success("Súbor nahraný")
+    toast.success(dict.wizard.fileUploaded)
   }
 
   const canContinue = step !== 0 || !!state.file
 
   function next() {
+    if (step === 5) {
+      const nextErrors = validateContact()
+      setErrors(nextErrors)
+      if (Object.keys(nextErrors).length > 0) return
+    }
     if (step === STEPS.length - 1) {
       setSubmitted(true)
       return
@@ -142,12 +166,15 @@ export function CustomOrderWizard() {
         <div className="flex size-16 items-center justify-center rounded-full bg-brand-primary/10 text-brand-primary">
           <CheckCircle2 className="size-8" />
         </div>
-        <h2 className="text-2xl font-semibold">Ďakujeme za objednávku!</h2>
+        <h2 className="text-2xl font-semibold">{dict.wizard.thanksTitle}</h2>
         <p className="max-w-md text-muted-foreground">
-          Tvoj model <strong>{state.file?.name}</strong> sme prijali. Cenovú ponuku a potvrdenie
-          ti pošleme na e-mail do 24 hodín.
+          {dict.wizard.thanksBodyPrefix} <strong>{state.file?.name}</strong>{" "}
+          {dict.wizard.thanksBodySuffix}
         </p>
-        <p className="text-lg font-semibold">Odhadovaná cena: {formatPrice({ amount: Math.round(total * 100) / 100, currency: "EUR" })}</p>
+        <p className="text-lg font-semibold">
+          {dict.wizard.estimatedPrice}:{" "}
+          {formatPrice({ amount: Math.round(total * 100) / 100, currency: "EUR" })}
+        </p>
         <Button
           className="mt-2 rounded-full bg-brand-primary text-brand-primary-foreground hover:bg-brand-accent"
           onClick={() => {
@@ -156,7 +183,7 @@ export function CustomOrderWizard() {
             setState((s) => ({ ...s, file: null }))
           }}
         >
-          Nahrať ďalší model
+          {dict.wizard.uploadAnother}
         </Button>
       </div>
     )
@@ -173,7 +200,7 @@ export function CustomOrderWizard() {
           <div className="min-h-[320px]">
             {step === 0 && (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Nahraj svoj 3D model</h3>
+                <h3 className="text-lg font-semibold">{dict.wizard.uploadTitle}</h3>
                 <div
                   onDragOver={(e) => {
                     e.preventDefault()
@@ -188,7 +215,9 @@ export function CustomOrderWizard() {
                   onClick={() => fileInputRef.current?.click()}
                   className={cn(
                     "flex cursor-pointer flex-col items-center gap-3 rounded-2xl border-2 border-dashed p-10 text-center transition-colors",
-                    dragActive ? "border-brand-primary bg-brand-primary/5" : "border-border hover:border-brand-primary/40"
+                    dragActive
+                      ? "border-brand-primary bg-brand-primary/5"
+                      : "border-border hover:border-brand-primary/40"
                   )}
                 >
                   <input
@@ -199,8 +228,8 @@ export function CustomOrderWizard() {
                     onChange={(e) => handleFiles(e.target.files)}
                   />
                   <UploadCloud className="size-9 text-brand-primary" />
-                  <p className="font-medium">Presuň súbor sem alebo klikni pre výber</p>
-                  <p className="text-xs text-muted-foreground">Podporované formáty: STL, OBJ, 3MF · max. 100 MB</p>
+                  <p className="font-medium">{dict.wizard.uploadHint}</p>
+                  <p className="text-xs text-muted-foreground">{dict.wizard.uploadFormats}</p>
                 </div>
 
                 {state.file && (
@@ -210,7 +239,11 @@ export function CustomOrderWizard() {
                       <p className="truncate text-sm font-medium">{state.file.name}</p>
                       <p className="text-xs text-muted-foreground">{formatBytes(state.file.size)}</p>
                     </div>
-                    <button onClick={() => update("file", null)} className="text-muted-foreground hover:text-destructive">
+                    <button
+                      onClick={() => update("file", null)}
+                      aria-label={dict.common.remove}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
                       <X className="size-4" />
                     </button>
                   </div>
@@ -220,7 +253,7 @@ export function CustomOrderWizard() {
 
             {step === 1 && (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Vyber materiál</h3>
+                <h3 className="text-lg font-semibold">{dict.wizard.chooseMaterial}</h3>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {materials.map((m) => (
                     <button
@@ -236,7 +269,7 @@ export function CustomOrderWizard() {
                       <div className="mb-1 flex items-center justify-between">
                         <span className="font-medium">{m.name}</span>
                         <span className="text-sm text-muted-foreground">
-                          od {formatPrice({ amount: MATERIAL_BASE[m.id], currency: "EUR" })}
+                          {dict.common.from} {formatPrice({ amount: MATERIAL_BASE[m.id], currency: "EUR" })}
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground">{m.shortDescription}</p>
@@ -249,7 +282,8 @@ export function CustomOrderWizard() {
             {step === 2 && (
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">
-                  Vyber farbu <span className="font-normal text-muted-foreground">— {state.color.name}</span>
+                  {dict.wizard.chooseColor}{" "}
+                  <span className="font-normal text-muted-foreground">— {state.color.name}</span>
                 </h3>
                 <div className="flex flex-wrap gap-3">
                   {COLORS.map((c) => (
@@ -270,7 +304,7 @@ export function CustomOrderWizard() {
 
             {step === 3 && (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Vyber výšku vrstvy</h3>
+                <h3 className="text-lg font-semibold">{dict.wizard.chooseLayer}</h3>
                 <div className="space-y-3">
                   {LAYER_HEIGHTS.map((l) => (
                     <button
@@ -298,26 +332,16 @@ export function CustomOrderWizard() {
 
             {step === 4 && (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Množstvo</h3>
+                <h3 className="text-lg font-semibold">{dict.wizard.quantityTitle}</h3>
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center rounded-full border border-border">
-                    <button
-                      className="flex size-12 items-center justify-center hover:bg-secondary"
-                      onClick={() => update("quantity", Math.max(1, state.quantity - 1))}
-                    >
-                      <Minus className="size-4" />
-                    </button>
-                    <span className="w-12 text-center text-lg font-semibold">{state.quantity}</span>
-                    <button
-                      className="flex size-12 items-center justify-center hover:bg-secondary"
-                      onClick={() => update("quantity", state.quantity + 1)}
-                    >
-                      <Plus className="size-4" />
-                    </button>
-                  </div>
+                  <QuantityStepper
+                    value={state.quantity}
+                    onChange={(q) => update("quantity", q)}
+                    size="lg"
+                  />
                   {state.quantity >= 5 && (
                     <span className="rounded-full bg-brand-primary/10 px-3 py-1.5 text-xs font-medium text-brand-primary">
-                      -10% množstevná zľava
+                      {dict.wizard.bulkDiscount}
                     </span>
                   )}
                 </div>
@@ -326,7 +350,7 @@ export function CustomOrderWizard() {
 
             {step === 5 && (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Doprava a kontakt</h3>
+                <h3 className="text-lg font-semibold">{dict.wizard.shippingTitle}</h3>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {SHIPPING_METHODS.map((m) => (
                     <button
@@ -344,7 +368,9 @@ export function CustomOrderWizard() {
                         <p className="font-medium">
                           {m.label}{" "}
                           <span className="font-normal text-muted-foreground">
-                            {m.price === 0 ? "Zadarmo" : formatPrice({ amount: m.price, currency: "EUR" })}
+                            {m.price === 0
+                              ? dict.checkout.free
+                              : formatPrice({ amount: m.price, currency: "EUR" })}
                           </span>
                         </p>
                         <p className="text-xs text-muted-foreground">{m.desc}</p>
@@ -354,47 +380,88 @@ export function CustomOrderWizard() {
                 </div>
                 <div className="grid grid-cols-1 gap-3 pt-2 sm:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label htmlFor="wiz-name">Meno a priezvisko</Label>
-                    <Input id="wiz-name" value={state.name} onChange={(e) => update("name", e.target.value)} />
+                    <Label htmlFor="wiz-name">{dict.forms.name}</Label>
+                    <Input
+                      id="wiz-name"
+                      value={state.name}
+                      aria-invalid={!!errors.name}
+                      onChange={(e) => update("name", e.target.value)}
+                    />
+                    {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="wiz-email">E-mail</Label>
-                    <Input id="wiz-email" type="email" value={state.email} onChange={(e) => update("email", e.target.value)} />
+                    <Label htmlFor="wiz-email">{dict.forms.email}</Label>
+                    <Input
+                      id="wiz-email"
+                      type="email"
+                      value={state.email}
+                      aria-invalid={!!errors.email}
+                      onChange={(e) => update("email", e.target.value)}
+                    />
+                    {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
                   </div>
-                  <div className="space-y-1.5 sm:col-span-2">
-                    <Label htmlFor="wiz-address">Adresa</Label>
-                    <Input id="wiz-address" value={state.address} onChange={(e) => update("address", e.target.value)} />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="wiz-city">Mesto</Label>
-                    <Input id="wiz-city" value={state.city} onChange={(e) => update("city", e.target.value)} />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="wiz-zip">PSČ</Label>
-                    <Input id="wiz-zip" value={state.postalCode} onChange={(e) => update("postalCode", e.target.value)} />
-                  </div>
+                  {state.shippingMethod.id === "courier" && (
+                    <>
+                      <div className="space-y-1.5 sm:col-span-2">
+                        <Label htmlFor="wiz-address">{dict.forms.address}</Label>
+                        <Input
+                          id="wiz-address"
+                          value={state.address}
+                          aria-invalid={!!errors.address}
+                          onChange={(e) => update("address", e.target.value)}
+                        />
+                        {errors.address && (
+                          <p className="text-xs text-destructive">{errors.address}</p>
+                        )}
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="wiz-city">{dict.forms.city}</Label>
+                        <Input
+                          id="wiz-city"
+                          value={state.city}
+                          aria-invalid={!!errors.city}
+                          onChange={(e) => update("city", e.target.value)}
+                        />
+                        {errors.city && <p className="text-xs text-destructive">{errors.city}</p>}
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="wiz-zip">{dict.forms.postalCode}</Label>
+                        <Input
+                          id="wiz-zip"
+                          value={state.postalCode}
+                          aria-invalid={!!errors.postalCode}
+                          onChange={(e) => update("postalCode", e.target.value)}
+                        />
+                        {errors.postalCode && (
+                          <p className="text-xs text-destructive">{errors.postalCode}</p>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             )}
 
             {step === 6 && (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Súhrn objednávky</h3>
+                <h3 className="text-lg font-semibold">{dict.wizard.summaryTitle}</h3>
                 <dl className="divide-y divide-border rounded-2xl border border-border">
                   {[
-                    ["Súbor", state.file?.name ?? "—"],
-                    ["Materiál", materials.find((m) => m.id === state.material)?.name ?? ""],
-                    ["Farba", state.color.name],
-                    ["Výška vrstvy", state.layerHeight.label],
-                    ["Množstvo", String(state.quantity)],
-                    ["Doprava", state.shippingMethod.label],
-                    ["Meno", state.name || "—"],
-                    ["E-mail", state.email || "—"],
-                    ["Adresa", [state.address, state.city, state.postalCode].filter(Boolean).join(", ") || "—"],
+                    [dict.wizard.fileLabel, state.file?.name ?? "—"],
+                    [dict.common.material, materials.find((m) => m.id === state.material)?.name ?? ""],
+                    [dict.common.color, state.color.name],
+                    [dict.wizard.steps.layer, state.layerHeight.label],
+                    [dict.common.quantity, String(state.quantity)],
+                    [dict.wizard.steps.shipping, state.shippingMethod.label],
+                    [dict.forms.name, state.name],
+                    [dict.forms.email, state.email],
+                    ...(state.shippingMethod.id === "courier"
+                      ? [[dict.forms.address, [state.address, state.city, state.postalCode].filter(Boolean).join(", ")]]
+                      : []),
                   ].map(([label, value]) => (
-                    <div key={label} className="flex justify-between px-4 py-3 text-sm">
-                      <dt className="text-muted-foreground">{label}</dt>
-                      <dd className="font-medium">{value}</dd>
+                    <div key={label} className="flex justify-between gap-4 px-4 py-3 text-sm">
+                      <dt className="shrink-0 text-muted-foreground">{label}</dt>
+                      <dd className="truncate font-medium">{value}</dd>
                     </div>
                   ))}
                 </dl>
@@ -403,32 +470,32 @@ export function CustomOrderWizard() {
           </div>
 
           {/* Price summary sidebar */}
-          <div className="space-y-4 rounded-2xl bg-secondary p-5">
-            <p className="text-sm font-medium">Odhadovaná cena</p>
+          <div className="h-fit space-y-4 rounded-2xl bg-secondary p-5">
+            <p className="text-sm font-medium">{dict.wizard.estimatedPrice}</p>
             <div className="space-y-2 text-sm text-muted-foreground">
               <div className="flex justify-between">
-                <span>Výroba</span>
-                <span>{formatPrice({ amount: Math.round(productionCost * 100) / 100, currency: "EUR" })}</span>
+                <span>{dict.wizard.production}</span>
+                <span>
+                  {formatPrice({ amount: Math.round(productionCost * 100) / 100, currency: "EUR" })}
+                </span>
               </div>
               <div className="flex justify-between">
-                <span>Doprava</span>
+                <span>{dict.cart.shipping}</span>
                 <span>
                   {state.shippingMethod.price === 0
-                    ? "Zadarmo"
+                    ? dict.checkout.free
                     : formatPrice({ amount: state.shippingMethod.price, currency: "EUR" })}
                 </span>
               </div>
             </div>
             <Separator />
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-medium">Spolu</span>
+              <span className="text-sm font-medium">{dict.cart.total}</span>
               <span className="text-2xl font-semibold">
                 {formatPrice({ amount: Math.round(total * 100) / 100, currency: "EUR" })}
               </span>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Konečná cena môže byť upravená po kontrole modelu naším tímom.
-            </p>
+            <p className="text-xs text-muted-foreground">{dict.wizard.priceNote}</p>
           </div>
         </div>
       </div>
@@ -439,14 +506,14 @@ export function CustomOrderWizard() {
           onClick={() => setStep((s) => Math.max(0, s - 1))}
           disabled={step === 0}
         >
-          Späť
+          {dict.common.back}
         </Button>
         <Button
           onClick={next}
           disabled={!canContinue}
           className="rounded-full bg-brand-primary px-7 text-brand-primary-foreground hover:bg-brand-accent"
         >
-          {step === STEPS.length - 1 ? "Odoslať objednávku" : "Pokračovať"}
+          {step === STEPS.length - 1 ? dict.wizard.submitOrder : dict.common.continue}
         </Button>
       </div>
     </div>

@@ -11,7 +11,7 @@ export function NewsletterSection() {
   const [submitted, setSubmitted] = useState(false)
 
   return (
-    <section className="bg-brand-dark py-20 text-white sm:py-24">
+    <section className="bg-brand-dark py-20 text-white sm:py-24 dark:border-y dark:border-white/10 dark:bg-card">
       <Container className="flex flex-col items-center gap-6 text-center">
         <h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
           {dict.home.newsletterTitle}

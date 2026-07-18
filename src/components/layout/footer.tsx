@@ -1,7 +1,9 @@
 "use client"
 
+import * as React from "react"
 import Link from "next/link"
-import { Mail, Send } from "lucide-react"
+import { toast } from "sonner"
+import { Mail, Send, CheckCircle2 } from "lucide-react"
 import { FacebookIcon, InstagramIcon } from "@/components/icons/social"
 import { Logo } from "@/components/logo"
 import { Input } from "@/components/ui/input"
@@ -20,10 +22,10 @@ const columns = [
   {
     title: dict.footer.support,
     links: [
-      { href: "/kontakt", label: dict.footer.faq },
-      { href: "/kontakt", label: dict.footer.shipping },
-      { href: "/kontakt", label: dict.footer.returns },
-      { href: "/kontakt", label: dict.footer.warranty },
+      { href: "/faq", label: dict.footer.faq },
+      { href: "/faq#doprava", label: dict.footer.shipping },
+      { href: "/faq#vratenie", label: dict.footer.returns },
+      { href: "/faq#zaruka", label: dict.footer.warranty },
     ],
   },
   {
@@ -31,15 +33,23 @@ const columns = [
     links: [
       { href: "/materialy", label: "Materiály" },
       { href: "/zakazkova-vyroba", label: dict.nav.customOrder },
-      { href: "/privacy", label: dict.footer.privacy },
-      { href: "/terms", label: dict.footer.terms },
+      { href: "/ochrana-sukromia", label: dict.footer.privacy },
+      { href: "/obchodne-podmienky", label: dict.footer.terms },
     ],
   },
 ]
 
 export function Footer() {
+  const [subscribed, setSubscribed] = React.useState(false)
+
+  function handleSubscribe(e: React.FormEvent) {
+    e.preventDefault()
+    setSubscribed(true)
+    toast.success(dict.home.newsletterThanks)
+  }
+
   return (
-    <footer className="mt-24 bg-brand-dark text-brand-light">
+    <footer className="mt-24 bg-brand-dark text-brand-light dark:border-t dark:border-white/10 dark:bg-[#0e0e0e]">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1.2fr]">
           <div className="space-y-4">
@@ -49,15 +59,16 @@ export function Footer() {
             </p>
             <div className="flex items-center gap-2 pt-2">
               {[
-                { icon: FacebookIcon, href: "https://facebook.com" },
-                { icon: InstagramIcon, href: "https://instagram.com/agama3dstudio" },
-                { icon: Mail, href: "mailto:info@agama3dstudio.sk" },
-              ].map(({ icon: Icon, href }, i) => (
+                { icon: FacebookIcon, href: "https://facebook.com/agama3dstudio", label: "Facebook" },
+                { icon: InstagramIcon, href: "https://instagram.com/agama3dstudio", label: "Instagram" },
+                { icon: Mail, href: "mailto:info@agama3dstudio.sk", label: "E-mail" },
+              ].map(({ icon: Icon, href, label }) => (
                 <a
-                  key={i}
+                  key={label}
                   href={href}
                   target="_blank"
                   rel="noreferrer"
+                  aria-label={label}
                   className="flex size-9 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-brand-primary hover:text-brand-primary-foreground"
                 >
                   <Icon className="size-4" />
@@ -88,24 +99,30 @@ export function Footer() {
             <h4 className="mb-4 text-sm font-semibold text-white">
               {dict.footer.newsletterTitle}
             </h4>
-            <form
-              onSubmit={(e) => e.preventDefault()}
-              className="flex items-center gap-2"
-            >
-              <Input
-                type="email"
-                required
-                placeholder={dict.home.newsletterPlaceholder}
-                className="border-white/15 bg-white/5 text-white placeholder:text-white/40"
-              />
-              <Button
-                type="submit"
-                size="icon"
-                className="shrink-0 bg-brand-primary text-brand-primary-foreground hover:bg-brand-accent"
-              >
-                <Send className="size-4" />
-              </Button>
-            </form>
+            {subscribed ? (
+              <p className="flex items-center gap-2 text-sm text-brand-accent">
+                <CheckCircle2 className="size-4" />
+                {dict.home.newsletterThanks}
+              </p>
+            ) : (
+              <form onSubmit={handleSubscribe} className="flex items-center gap-2">
+                <Input
+                  type="email"
+                  required
+                  aria-label={dict.home.newsletterPlaceholder}
+                  placeholder={dict.home.newsletterPlaceholder}
+                  className="border-white/15 bg-white/5 text-white placeholder:text-white/40"
+                />
+                <Button
+                  type="submit"
+                  size="icon"
+                  aria-label={dict.home.newsletterCta}
+                  className="shrink-0 bg-brand-primary text-brand-primary-foreground hover:bg-brand-accent"
+                >
+                  <Send className="size-4" />
+                </Button>
+              </form>
+            )}
           </div>
         </div>
 

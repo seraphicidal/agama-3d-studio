@@ -18,7 +18,7 @@ export function CustomPrintingSection() {
   return (
     <section id="preco-my" className="py-20 sm:py-28">
       <Container>
-        <div className="grid grid-cols-1 items-center gap-12 rounded-3xl bg-brand-dark p-8 text-white sm:p-12 lg:grid-cols-2 lg:p-16">
+        <div className="grid grid-cols-1 items-center gap-12 rounded-3xl bg-brand-dark p-8 text-white sm:p-12 lg:grid-cols-2 lg:p-16 dark:bg-card dark:ring-1 dark:ring-white/10">
           <div className="space-y-7">
             <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-accent">
               Zákazková výroba

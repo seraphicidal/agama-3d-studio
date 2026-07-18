@@ -31,8 +31,8 @@ export function ContactForm() {
     defaultValues: { name: "", email: "", subject: "", message: "" },
   })
 
-  function onSubmit(values: ContactValues) {
-    console.log("contact form submitted", values)
+  function onSubmit(_values: ContactValues) {
+    // Submission endpoint pending backend wiring — see supabase/schema.sql.
     toast.success("Správa odoslaná, ozveme sa čo najskôr!")
     form.reset()
   }
