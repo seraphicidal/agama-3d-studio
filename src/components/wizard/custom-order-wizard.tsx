@@ -154,6 +154,21 @@ export function CustomOrderWizard() {
       if (Object.keys(nextErrors).length > 0) return
     }
     if (step === STEPS.length - 1) {
+      // Defensive re-validation at the submit boundary. The Stepper already
+      // disables forward navigation (indices > current), so this is normally
+      // only reached after each step's gate — but never let a submit through
+      // with a missing file or invalid contact details.
+      if (!state.file) {
+        setStep(0)
+        toast.error(dict.wizard.fileRequired)
+        return
+      }
+      const contactErrors = validateContact()
+      if (Object.keys(contactErrors).length > 0) {
+        setErrors(contactErrors)
+        setStep(5)
+        return
+      }
       setSubmitted(true)
       return
     }

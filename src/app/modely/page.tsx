@@ -1,4 +1,6 @@
 import { MarketplaceView } from "@/components/marketplace/marketplace-view"
+import { queryProducts } from "@/lib/data/products"
+import { getCategoriesWithCounts } from "@/lib/data/catalog"
 
 export const metadata = { title: "Modely" }
 
@@ -14,6 +16,8 @@ export default async function MarketplacePage({
 
   return (
     <MarketplaceView
+      products={queryProducts({})}
+      categories={getCategoriesWithCounts()}
       initialCategory={initialCategory}
       initialQuery={initialQuery}
       initialSort={initialSort}

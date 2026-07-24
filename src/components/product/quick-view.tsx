@@ -39,6 +39,7 @@ export function QuickView({
   const setCartOpen = useUIStore((s) => s.setCartOpen)
 
   function handleAdd() {
+    if (!product.inStock) return
     addItem({
       id: `${product.id}-${material}-${color.id}-${size}`,
       productId: product.id,
@@ -74,10 +75,12 @@ export function QuickView({
             <DialogDescription>{product.tagline}</DialogDescription>
           </DialogHeader>
 
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <RatingStars rating={product.rating} size={13} />
-            {product.rating.toFixed(1)} ({product.reviewCount})
-          </div>
+          {product.reviewCount > 0 && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <RatingStars rating={product.rating} size={13} />
+              {product.rating.toFixed(1)} ({product.reviewCount})
+            </div>
+          )}
 
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-semibold">{formatPrice(product.price)}</span>
@@ -152,10 +155,11 @@ export function QuickView({
           <div className="mt-auto flex items-center gap-2 pt-2">
             <QuantityStepper value={quantity} onChange={setQuantity} size="sm" className="h-9 px-1" />
             <Button
+              disabled={!product.inStock}
               className="h-9 flex-1 rounded-full bg-brand-primary text-brand-primary-foreground hover:bg-brand-accent"
               onClick={handleAdd}
             >
-              {dict.common.addToCart}
+              {product.inStock ? dict.common.addToCart : dict.common.outOfStock}
             </Button>
           </div>
           <Link

@@ -5,13 +5,12 @@ import { Container } from "@/components/container"
 import { SectionHeading } from "@/components/section-heading"
 import { ProductCard } from "@/components/product/product-card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { getNewArrivals } from "@/lib/data/products"
+import type { Product } from "@/lib/types"
 import { dict } from "@/lib/i18n"
 
 const PAGE_SIZE = 8
-const all = getNewArrivals()
 
-export function NewArrivalsSection() {
+export function NewArrivalsSection({ products }: { products: Product[] }) {
   const [count, setCount] = React.useState(PAGE_SIZE)
   const [loading, setLoading] = React.useState(false)
   const sentinelRef = React.useRef<HTMLDivElement>(null)
@@ -21,10 +20,10 @@ export function NewArrivalsSection() {
     if (!el) return
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && count < all.length && !loading) {
+        if (entries[0].isIntersecting && count < products.length && !loading) {
           setLoading(true)
           setTimeout(() => {
-            setCount((c) => Math.min(c + PAGE_SIZE, all.length))
+            setCount((c) => Math.min(c + PAGE_SIZE, products.length))
             setLoading(false)
           }, 500)
         }
@@ -33,9 +32,9 @@ export function NewArrivalsSection() {
     )
     observer.observe(el)
     return () => observer.disconnect()
-  }, [count, loading])
+  }, [count, loading, products.length])
 
-  const visible = all.slice(0, count)
+  const visible = products.slice(0, count)
 
   return (
     <section className="py-20 sm:py-28">
@@ -58,7 +57,7 @@ export function NewArrivalsSection() {
               </div>
             ))}
         </div>
-        {count < all.length && <div ref={sentinelRef} className="h-1" />}
+        {count < products.length && <div ref={sentinelRef} className="h-1" />}
       </Container>
     </section>
   )

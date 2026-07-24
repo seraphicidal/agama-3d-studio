@@ -16,8 +16,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Badge } from "@/components/ui/badge"
 import { ProductCard } from "@/components/product/product-card"
 import { FilterSidebar } from "@/components/marketplace/filter-sidebar"
-import { products } from "@/lib/data/products"
-import { categories } from "@/lib/data/categories"
+import type { Product, Category } from "@/lib/types"
 
 export interface MarketplaceFilters {
   categories: string[]
@@ -53,10 +52,14 @@ const SORT_OPTIONS = [
 ]
 
 export function MarketplaceView({
+  products,
+  categories,
   initialCategory,
   initialQuery,
   initialSort,
 }: {
+  products: Product[]
+  categories: Category[]
   initialCategory?: string
   initialQuery?: string
   initialSort?: string
@@ -123,6 +126,11 @@ export function MarketplaceView({
     (filters.minRating ? 1 : 0) +
     (filters.inStockOnly ? 1 : 0)
 
+  const showRatingFilter = React.useMemo(
+    () => products.some((p) => p.rating > 0),
+    [products]
+  )
+
   return (
     <div className="py-8 sm:py-12">
       <Container>
@@ -179,6 +187,8 @@ export function MarketplaceView({
                 filters={filters}
                 setFilters={setFilters}
                 onReset={() => setFilters(DEFAULT_FILTERS)}
+                showRatingFilter={showRatingFilter}
+                categories={categories}
               />
             </div>
           </aside>
@@ -212,6 +222,8 @@ export function MarketplaceView({
               filters={filters}
               setFilters={setFilters}
               onReset={() => setFilters(DEFAULT_FILTERS)}
+              showRatingFilter={showRatingFilter}
+              categories={categories}
             />
           </div>
         </SheetContent>

@@ -1,10 +1,11 @@
 import { Container } from "@/components/container"
 import { CategoryCard } from "@/components/category/category-card"
-import { categories } from "@/lib/data/categories"
+import { getCategoriesWithCounts } from "@/lib/data/catalog"
 
 export const metadata = { title: "Kategórie" }
 
 export default function CategoriesPage() {
+  const categories = getCategoriesWithCounts()
   return (
     <div className="py-12 sm:py-16">
       <Container className="space-y-10">

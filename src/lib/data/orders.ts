@@ -52,10 +52,5 @@ export const mockOrders: Order[] = [
   },
 ]
 
-export const orderStatusLabels: Record<Order["status"], string> = {
-  processing: "Spracováva sa",
-  printing: "Tlačí sa",
-  shipped: "Odoslané",
-  delivered: "Doručené",
-  cancelled: "Zrušené",
-}
+// Status labels moved to ./order-status (pure) so client components importing
+// them don't pull this products-dependent module into their bundle.

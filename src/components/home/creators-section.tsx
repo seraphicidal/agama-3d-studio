@@ -2,6 +2,7 @@ import { Container } from "@/components/container"
 import { SectionHeading } from "@/components/section-heading"
 import { CreatorCard } from "@/components/creator/creator-card"
 import { creators } from "@/lib/data/creators"
+import { products } from "@/lib/data/products"
 import { dict } from "@/lib/i18n"
 
 export function CreatorsSection() {
@@ -15,7 +16,13 @@ export function CreatorsSection() {
         />
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {creators.map((creator) => (
-            <CreatorCard key={creator.id} creator={creator} />
+            <CreatorCard
+              key={creator.id}
+              creator={creator}
+              featured={products
+                .filter((p) => creator.featuredPrintIds.includes(p.id))
+                .slice(0, 3)}
+            />
           ))}
         </div>
       </Container>

@@ -62,6 +62,7 @@ const sk = {
     freeShipping: "Doprava zadarmo",
     addedToCart: "pridané do košíka",
     linkCopied: "Odkaz skopírovaný",
+    noReviews: "Zatiaľ žiadne recenzie",
   },
   validation: {
     required: "Povinné pole",
@@ -151,6 +152,7 @@ const sk = {
     recommended: "Mohlo by sa ti páčiť",
     calculateShipping: "Vypočítať dopravu",
     shippingAtCheckout: "Doprava vypočítaná pri pokladni",
+    vatIncluded: "z toho DPH",
   },
   checkout: {
     steps: { shipping: "Doprava", payment: "Platba", summary: "Súhrn" },
@@ -188,6 +190,7 @@ const sk = {
     uploadHint: "Presuň súbor sem alebo klikni pre výber",
     uploadFormats: "Podporované formáty: STL, OBJ, 3MF · max. 100 MB",
     fileUploaded: "Súbor nahraný",
+    fileRequired: "Najprv nahraj 3D model.",
     invalidFormat: "Podporované formáty: STL, OBJ, 3MF",
     chooseMaterial: "Vyber materiál",
     chooseColor: "Vyber farbu",

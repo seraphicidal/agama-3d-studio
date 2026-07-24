@@ -2,34 +2,23 @@ import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import type { Address } from "@/lib/types"
 
-interface AccountUser {
-  name: string
-  email: string
-}
-
-interface AccountState {
-  user: AccountUser | null
+// Saved delivery addresses (a convenience feature, kept client-side). The auth
+// user itself now comes from Supabase (server) — the old localStorage login was
+// retired. Move addresses to a Supabase `addresses` table when convenient.
+interface AddressState {
   addresses: Address[]
-  login: (email: string, name?: string) => void
-  logout: () => void
   addAddress: (address: Address) => void
   removeAddress: (id: string) => void
 }
 
-export const useAccountStore = create<AccountState>()(
+export const useAddressStore = create<AddressState>()(
   persist(
     (set) => ({
-      user: null,
       addresses: [],
-      login: (email, name) =>
-        set({ user: { email, name: name ?? email.split("@")[0] } }),
-      logout: () => set({ user: null }),
       addAddress: (address) =>
         set((state) => ({ addresses: [...state.addresses, address] })),
       removeAddress: (id) =>
-        set((state) => ({
-          addresses: state.addresses.filter((a) => a.id !== id),
-        })),
+        set((state) => ({ addresses: state.addresses.filter((a) => a.id !== id) })),
     }),
     { name: "agama-account" }
   )

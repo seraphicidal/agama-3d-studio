@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Stepper } from "@/components/wizard/stepper"
 import { useCartStore } from "@/store/cart-store"
+import { computeTotals } from "@/lib/pricing"
 import { formatPrice } from "@/lib/format"
 import { dict } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
@@ -65,17 +66,23 @@ function Field({
 
 export function CheckoutFlow() {
   const items = useCartStore((s) => s.items)
-  const subtotal = useCartStore((s) => s.subtotal())
   const couponCode = useCartStore((s) => s.couponCode)
-  const discountAmount = useCartStore((s) => s.discountAmount())
   const clear = useCartStore((s) => s.clear)
   const [step, setStep] = React.useState(0)
   const [placed, setPlaced] = React.useState(false)
   const [processing, setProcessing] = React.useState(false)
   const [confirmationEmail, setConfirmationEmail] = React.useState("")
 
-  const shipping = subtotal >= 60 || subtotal === 0 ? 0 : 4.9
-  const total = Math.max(0, subtotal - discountAmount) + shipping
+  // Client-side display estimate via the shared pricing formula. The server
+  // re-derives the authoritative figure from product ids at /api/checkout/quote.
+  const totals = React.useMemo(
+    () =>
+      computeTotals(
+        items.map((i) => ({ unitPrice: i.price.amount, quantity: i.quantity })),
+        { couponCode }
+      ),
+    [items, couponCode]
+  )
 
   const [shippingInfo, setShippingInfo] = React.useState<ShippingInfo>({
     name: "",
@@ -100,16 +107,51 @@ export function CheckoutFlow() {
     setStep((s) => s + 1)
   }
 
-  function placeOrder() {
+  async function placeOrder() {
     setProcessing(true)
     setConfirmationEmail(shippingInfo.email)
-    // Real integration: call lib/payments createCheckoutSession() here and
-    // redirect to the provider-hosted payment page once live keys exist.
-    setTimeout(() => {
-      setProcessing(false)
-      setPlaced(true)
-      clear()
-    }, 1200)
+
+    // Ask the server to create a Stripe Checkout Session (server-authoritative:
+    // it re-prices from the catalog). If Stripe isn't configured the route returns
+    // 503 and we fall back to the demo confirmation so the flow still completes.
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: items.map((i) => ({
+            productId: i.productId,
+            quantity: i.quantity,
+            material: i.material,
+            color: i.color,
+            size: i.size,
+          })),
+          couponCode: couponCode ?? undefined,
+          customerEmail: shippingInfo.email,
+          customerName: shippingInfo.name,
+          address: {
+            fullName: shippingInfo.name,
+            street: shippingInfo.address,
+            city: shippingInfo.city,
+            postalCode: shippingInfo.postalCode,
+            country: "Slovensko",
+          },
+        }),
+      })
+      if (res.ok) {
+        const data: { url?: string } = await res.json()
+        if (data.url) {
+          window.location.href = data.url // → Stripe-hosted payment page
+          return
+        }
+      }
+    } catch {
+      // fall through to the demo confirmation
+    }
+
+    setProcessing(false)
+    setPlaced(true)
+    clear()
   }
 
   if (items.length === 0 && !placed) {
@@ -290,23 +332,23 @@ export function CheckoutFlow() {
           <div className="space-y-2 text-sm text-muted-foreground">
             <div className="flex justify-between">
               <span>{dict.cart.subtotal}</span>
-              <span>{formatPrice({ amount: subtotal, currency: "EUR" })}</span>
+              <span>{formatPrice({ amount: totals.subtotal, currency: "EUR" })}</span>
             </div>
-            {discountAmount > 0 && (
+            {totals.discountAmount > 0 && (
               <div className="flex justify-between text-brand-primary">
                 <span className="flex items-center gap-1">
                   <TicketPercent className="size-3.5" />
                   {dict.cart.discount} ({couponCode})
                 </span>
-                <span>−{formatPrice({ amount: discountAmount, currency: "EUR" })}</span>
+                <span>−{formatPrice({ amount: totals.discountAmount, currency: "EUR" })}</span>
               </div>
             )}
             <div className="flex justify-between">
               <span>{dict.cart.shipping}</span>
               <span>
-                {shipping === 0
+                {totals.shipping === 0
                   ? dict.checkout.free
-                  : formatPrice({ amount: shipping, currency: "EUR" })}
+                  : formatPrice({ amount: totals.shipping, currency: "EUR" })}
               </span>
             </div>
           </div>
@@ -314,9 +356,15 @@ export function CheckoutFlow() {
           <div className="flex items-baseline justify-between">
             <span className="text-sm font-medium">{dict.cart.total}</span>
             <span className="text-2xl font-semibold">
-              {formatPrice({ amount: total, currency: "EUR" })}
+              {formatPrice({ amount: totals.total, currency: "EUR" })}
             </span>
           </div>
+          {totals.vatAmount != null && (
+            <p className="text-right text-xs text-muted-foreground">
+              {dict.cart.vatIncluded} ({Math.round(totals.vatRate! * 100)} %):{" "}
+              {formatPrice({ amount: totals.vatAmount, currency: "EUR" })}
+            </p>
+          )}
         </div>
       </div>
     </div>

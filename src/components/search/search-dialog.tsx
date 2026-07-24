@@ -13,8 +13,7 @@ import {
 } from "@/components/ui/dialog"
 import { useUIStore } from "@/store/ui-store"
 import { useSearchStore } from "@/store/search-store"
-import { products } from "@/lib/data/products"
-import { categories } from "@/lib/data/categories"
+import type { Product, Category } from "@/lib/types"
 import { formatPrice } from "@/lib/format"
 import { dict } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
@@ -46,6 +45,32 @@ export function SearchDialog() {
   const recent = useSearchStore((s) => s.recent)
   const addRecent = useSearchStore((s) => s.addRecent)
   const listRef = React.useRef<HTMLDivElement>(null)
+  const [catalog, setCatalog] = React.useState<{
+    products: Product[]
+    categories: Category[]
+  } | null>(null)
+
+  // Lazy-load the catalog the first time the palette opens, via the API — the
+  // product array no longer ships in the global bundle through this
+  // layout-level component.
+  React.useEffect(() => {
+    if (!open || catalog) return
+    let active = true
+    Promise.all([
+      fetch("/api/products").then((r) => r.json()),
+      fetch("/api/categories").then((r) => r.json()),
+    ])
+      .then(([p, c]) => {
+        if (active)
+          setCatalog({ products: p.items ?? [], categories: c.items ?? [] })
+      })
+      .catch(() => {
+        if (active) setCatalog({ products: [], categories: [] })
+      })
+    return () => {
+      active = false
+    }
+  }, [open, catalog])
 
   React.useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -61,6 +86,8 @@ export function SearchDialog() {
   const sections = React.useMemo<SearchSection[]>(() => {
     const result: SearchSection[] = []
     const q = query.trim().toLowerCase()
+    const cats = catalog?.categories ?? []
+    const prods = catalog?.products ?? []
 
     if (!q && recent.length > 0) {
       result.push({
@@ -76,7 +103,7 @@ export function SearchDialog() {
     }
 
     const matchedCategories = (
-      q ? categories.filter((c) => c.name.toLowerCase().includes(q)) : categories
+      q ? cats.filter((c) => c.name.toLowerCase().includes(q)) : cats
     ).slice(0, 5)
     if (matchedCategories.length > 0) {
       result.push({
@@ -93,8 +120,8 @@ export function SearchDialog() {
 
     const matchedProducts = (
       q
-        ? products.filter((p) => p.name.toLowerCase().includes(q))
-        : products.filter((p) => p.trending)
+        ? prods.filter((p) => p.name.toLowerCase().includes(q))
+        : prods.filter((p) => p.trending)
     ).slice(0, 6)
     if (matchedProducts.length > 0) {
       result.push({
@@ -126,7 +153,7 @@ export function SearchDialog() {
     }
 
     return result
-  }, [query, recent])
+  }, [query, recent, catalog])
 
   const flatItems = React.useMemo(() => sections.flatMap((s) => s.items), [sections])
 

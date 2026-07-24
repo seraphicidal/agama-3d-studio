@@ -59,11 +59,17 @@ export default async function ProductPage({
         : "https://schema.org/OutOfStock",
       itemCondition: "https://schema.org/NewCondition",
     },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: product.rating,
-      reviewCount: product.reviewCount,
-    },
+    // Only emit aggregateRating with real reviews — fabricated structured-data
+    // ratings breach the Omnibus Directive and Google's review-snippet policy.
+    ...(product.reviewCount > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: product.rating,
+            reviewCount: product.reviewCount,
+          },
+        }
+      : {}),
   }
 
   const breadcrumbJsonLd = {

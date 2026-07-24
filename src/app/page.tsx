@@ -3,6 +3,7 @@ import { CategoriesSection } from "@/components/home/categories-section"
 import { TrendingSection } from "@/components/home/trending-section"
 import { CreatorsSection } from "@/components/home/creators-section"
 import { NewArrivalsSection } from "@/components/home/new-arrivals-section"
+import { getNewArrivals } from "@/lib/data/products"
 import { CustomPrintingSection } from "@/components/home/custom-printing-section"
 import { WhyUsSection } from "@/components/home/why-us-section"
 import { ReviewsSection } from "@/components/home/reviews-section"
@@ -16,7 +17,7 @@ export default function Home() {
       <CategoriesSection />
       <TrendingSection />
       <CreatorsSection />
-      <NewArrivalsSection />
+      <NewArrivalsSection products={getNewArrivals()} />
       <CustomPrintingSection />
       <WhyUsSection />
       <ReviewsSection />
