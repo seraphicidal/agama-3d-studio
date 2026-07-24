@@ -25,20 +25,20 @@ export default function ContactPage() {
               <div className="flex items-start gap-3">
                 <MapPin className="mt-0.5 size-5 shrink-0 text-brand-primary" />
                 <div>
-                  <p className="font-medium">Zlatnícka 12, 811 04 Bratislava</p>
+                  <p className="font-medium">Zámocká 65/1, Malacky</p>
                   <p className="text-sm text-muted-foreground">Slovensko</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <Phone className="mt-0.5 size-5 shrink-0 text-brand-primary" />
-                <a href="tel:+421900123456" className="font-medium hover:text-brand-primary">
-                  +421 900 123 456
+                <a href="tel:+421944771325" className="font-medium hover:text-brand-primary">
+                  +421 944 771 325
                 </a>
               </div>
               <div className="flex items-start gap-3">
                 <Mail className="mt-0.5 size-5 shrink-0 text-brand-primary" />
-                <a href="mailto:info@agama3dstudio.sk" className="font-medium hover:text-brand-primary">
-                  info@agama3dstudio.sk
+                <a href="mailto:agamaprint3d@gmail.com" className="font-medium hover:text-brand-primary">
+                  agamaprint3d@gmail.com
                 </a>
               </div>
               <div className="flex items-start gap-3">
@@ -70,7 +70,7 @@ export default function ContactPage() {
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center">
                 <MapPin className="size-8 text-brand-primary" />
                 <p className="text-sm font-medium">Mapa bude čoskoro dostupná</p>
-                <p className="text-xs text-muted-foreground">Zlatnícka 12, Bratislava</p>
+                <p className="text-xs text-muted-foreground">Zámocká 65/1, Malacky</p>
               </div>
             </div>
           </div>

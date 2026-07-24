@@ -61,7 +61,7 @@ export function Footer() {
               {[
                 { icon: FacebookIcon, href: "https://facebook.com/agama3dstudio", label: "Facebook" },
                 { icon: InstagramIcon, href: "https://instagram.com/agama3dstudio", label: "Instagram" },
-                { icon: Mail, href: "mailto:info@agama3dstudio.sk", label: "E-mail" },
+                { icon: Mail, href: "mailto:agamaprint3d@gmail.com", label: "E-mail" },
               ].map(({ icon: Icon, href, label }) => (
                 <a
                   key={label}

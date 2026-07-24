@@ -3,22 +3,23 @@ import { SITE_NAME } from "@/lib/site"
 // Brand / trading name — safe to display everywhere (already used across the app).
 export const BRAND_NAME = SITE_NAME
 
-// ⚠️ TODO_REPLACE — REAL registered legal identity. These are intentionally BLANK.
-// NEVER commit guessed or plausible-looking values: operating a live Slovak e-shop
-// with an incorrect IČO / DIČ / address is illegal. `legalIdentityComplete` gates
-// every merchant-identity / legal block (footer, invoices, order emails) so nothing
-// fake is shown until you fill these in. See SETUP.md → Legal identity.
+// Contact details below are OWNER-PROVIDED (real). The registered legal identifiers
+// (legalName / IČO / DIČ / IČ DPH) are still BLANK — NEVER commit guessed values:
+// operating a live Slovak e-shop with an incorrect IČO/DIČ is illegal.
+// `legalIdentityComplete` gates the merchant-identity / legal blocks (invoices,
+// order emails) so they stay hidden until the legal identifiers are filled.
+// See SETUP.md → Legal identity.
 export const COMPANY = {
   legalName: "", // TODO_REPLACE: registered company name
   ico: "", // TODO_REPLACE: IČO
   dic: "", // TODO_REPLACE: DIČ
   vatId: "", // TODO_REPLACE: IČ DPH (VAT number), if VAT-registered
-  street: "", // TODO_REPLACE: registered street address
-  city: "", // TODO_REPLACE
-  postalCode: "", // TODO_REPLACE
+  street: "Zámocká 65/1",
+  city: "Malacky",
+  postalCode: "", // TODO_REPLACE: PSČ (not provided; Malacky is 901 01 — confirm)
   country: "Slovensko",
-  contactEmail: "", // TODO_REPLACE
-  phone: "", // TODO_REPLACE
+  contactEmail: "agamaprint3d@gmail.com",
+  phone: "+421 944 771 325",
 }
 
 // True only once the essential legal identifiers are filled. Render legal blocks

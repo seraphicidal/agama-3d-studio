@@ -62,7 +62,7 @@ const COLORS = [
 
 const SHIPPING_METHODS = [
   { id: "courier", label: "Kuriér", desc: "Doručenie do 3-6 pracovných dní", price: 4.9, icon: Truck },
-  { id: "pickup", label: "Osobný odber", desc: "Bratislava, Zlatnícka 12", price: 0, icon: Store },
+  { id: "pickup", label: "Osobný odber", desc: "Malacky, Zámocká 65/1", price: 0, icon: Store },
 ]
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
