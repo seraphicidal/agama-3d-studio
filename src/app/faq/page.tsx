@@ -52,7 +52,7 @@ const sections = [
     items: [
       {
         q: "Aká záruka sa vzťahuje na výtlačky?",
-        a: "Na všetky produkty poskytujeme zákonnú záruku 24 mesiacov. Ak model dorazí poškodený alebo má výrobnú vadu, pošli nám fotky na info@agama3dstudio.sk a obratom to vyriešime — najčastejšie novou tlačou zadarmo.",
+        a: "Na všetky produkty poskytujeme zákonnú záruku 24 mesiacov. Ak model dorazí poškodený alebo má výrobnú vadu, pošli nám fotky na agamaprint3d@gmail.com a obratom to vyriešime — najčastejšie novou tlačou zadarmo.",
       },
       {
         q: "Model mi prišiel poškodený prepravou. Čo teraz?",

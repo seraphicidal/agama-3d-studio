@@ -8,7 +8,7 @@ export const metadata = {
 const sections = [
   {
     title: "1. Úvodné ustanovenia",
-    body: "Tieto všeobecné obchodné podmienky upravujú vzťah medzi Agama 3D Studio, Zlatnícka 12, 811 04 Bratislava (ďalej len „predávajúci“) a zákazníkom pri nákupe cez internetový obchod agama3dstudio.sk.",
+    body: "Tieto všeobecné obchodné podmienky upravujú vzťah medzi Agama 3D Studio, Zámocká 65/1, Malacky (ďalej len „predávajúci“) a zákazníkom pri nákupe cez internetový obchod.",
   },
   {
     title: "2. Objednávka a uzavretie zmluvy",
@@ -32,7 +32,7 @@ const sections = [
   },
   {
     title: "7. Reklamácie",
-    body: "Na tovar sa vzťahuje zákonná záruka 24 mesiacov. Reklamácie vybavujeme do 30 dní; kontaktuj nás na info@agama3dstudio.sk s popisom vady a fotografiami.",
+    body: "Na tovar sa vzťahuje zákonná záruka 24 mesiacov. Reklamácie vybavujeme do 30 dní; kontaktuj nás na agamaprint3d@gmail.com s popisom vady a fotografiami.",
   },
   {
     title: "8. Záverečné ustanovenia",

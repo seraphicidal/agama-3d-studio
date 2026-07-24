@@ -46,8 +46,8 @@ export const SHIPPING_METHODS: ShippingMethod[] = [
   },
   {
     id: "pickup",
-    label: "Osobný odber – Bratislava",
-    description: "Osobné vyzdvihnutie na predajni, Zlatnícka 12",
+    label: "Osobný odber – Malacky",
+    description: "Osobné vyzdvihnutie na predajni, Zámocká 65/1, Malacky",
     carrier: "Osobný odber",
     price: 0,
     estimatedDaysMin: 0,

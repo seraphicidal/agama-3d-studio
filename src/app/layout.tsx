@@ -56,9 +56,8 @@ const organizationJsonLd = {
   ],
   address: {
     "@type": "PostalAddress",
-    streetAddress: "Zlatnícka 12",
-    addressLocality: "Bratislava",
-    postalCode: "811 04",
+    streetAddress: "Zámocká 65/1",
+    addressLocality: "Malacky",
     addressCountry: "SK",
   },
 };
