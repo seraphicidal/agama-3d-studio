@@ -65,6 +65,7 @@ const en: Dictionary = {
     freeShipping: "Free shipping",
     addedToCart: "added to cart",
     linkCopied: "Link copied",
+    noReviews: "No reviews yet",
   },
   validation: {
     required: "Required field",
@@ -152,6 +153,7 @@ const en: Dictionary = {
     recommended: "You might also like",
     calculateShipping: "Calculate shipping",
     shippingAtCheckout: "Shipping calculated at checkout",
+    vatIncluded: "incl. VAT",
   },
   checkout: {
     steps: { shipping: "Shipping", payment: "Payment", summary: "Summary" },
@@ -189,6 +191,7 @@ const en: Dictionary = {
     uploadHint: "Drag a file here or click to browse",
     uploadFormats: "Supported formats: STL, OBJ, 3MF · max. 100 MB",
     fileUploaded: "File uploaded",
+    fileRequired: "Please upload a 3D model first.",
     invalidFormat: "Supported formats: STL, OBJ, 3MF",
     chooseMaterial: "Choose a material",
     chooseColor: "Choose a color",

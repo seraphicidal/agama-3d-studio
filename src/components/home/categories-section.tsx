@@ -1,11 +1,11 @@
 import { Container } from "@/components/container"
 import { SectionHeading } from "@/components/section-heading"
 import { CategoryCard } from "@/components/category/category-card"
-import { categories } from "@/lib/data/categories"
+import { getCategoriesWithCounts } from "@/lib/data/catalog"
 import { dict } from "@/lib/i18n"
 
 export function CategoriesSection() {
-  const featured = categories.slice(0, 10)
+  const featured = getCategoriesWithCounts().slice(0, 10)
 
   return (
     <section className="py-20 sm:py-28">

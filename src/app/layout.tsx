@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, Sora } from "next/font/google";
+import { Inter, Sora } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -14,11 +14,6 @@ import "./globals.css";
 const fontSans = Inter({
   variable: "--font-sans",
   subsets: ["latin", "latin-ext"],
-});
-
-const fontMono = JetBrains_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
 });
 
 const fontDisplay = Sora({
@@ -90,7 +85,7 @@ export default function RootLayout({
     <html
       lang="sk"
       suppressHydrationWarning
-      className={`${fontSans.variable} ${fontMono.variable} ${fontDisplay.variable} h-full antialiased`}
+      className={`${fontSans.variable} ${fontDisplay.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <JsonLd data={organizationJsonLd} />

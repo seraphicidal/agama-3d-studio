@@ -1,22 +1,10 @@
-// Integration seam for Supabase auth/DB. No project URL/anon key exists yet.
-// Account state currently lives in `useAccountStore` (localStorage). Swap
-// these for real `createBrowserClient`/`createServerClient` calls from
-// `@supabase/ssr` once a Supabase project is provisioned.
+import { createBrowserClient } from "@supabase/ssr"
+import { getSupabaseConfig } from "./config"
 
-export interface SupabaseUser {
-  id: string
-  email: string
-}
-
-export async function getUser(): Promise<SupabaseUser | null> {
-  throw new Error(
-    "Supabase is not configured yet. Add NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY and implement getUser()."
-  )
-}
-
-export async function signInWithPassword(
-  _email: string,
-  _password: string
-): Promise<SupabaseUser> {
-  throw new Error("Supabase is not configured yet. Implement signInWithPassword().")
+// Browser Supabase client for Client Components (auth, RLS-guarded reads).
+// Call it from an effect/handler, not at module scope, so an unconfigured build
+// still renders instead of throwing during import.
+export function createSupabaseBrowserClient() {
+  const { url, anonKey } = getSupabaseConfig()
+  return createBrowserClient(url, anonKey)
 }

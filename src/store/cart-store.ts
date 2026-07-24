@@ -1,12 +1,7 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import type { CartItem } from "@/lib/types"
-
-// Demo coupon codes → discount rate. Replace with a server-side lookup once a
-// real backend exists; the store API below won't need to change shape.
-export const COUPONS: Record<string, number> = {
-  AGAMA10: 0.1,
-}
+import { normalizeCoupon } from "@/lib/pricing"
 
 interface CartState {
   items: CartItem[]
@@ -18,9 +13,6 @@ interface CartState {
   applyCoupon: (code: string) => boolean
   removeCoupon: () => void
   clear: () => void
-  subtotal: () => number
-  discountRate: () => number
-  discountAmount: () => number
   itemCount: () => number
 }
 
@@ -52,21 +44,13 @@ export const useCartStore = create<CartState>()(
           ),
         })),
       applyCoupon: (code) => {
-        const normalized = code.trim().toUpperCase()
-        if (!(normalized in COUPONS)) return false
+        const normalized = normalizeCoupon(code)
+        if (!normalized) return false
         set({ couponCode: normalized })
         return true
       },
       removeCoupon: () => set({ couponCode: null }),
       clear: () => set({ items: [], couponCode: null }),
-      subtotal: () =>
-        get().items.reduce((sum, i) => sum + i.price.amount * i.quantity, 0),
-      discountRate: () => {
-        const code = get().couponCode
-        return code ? (COUPONS[code] ?? 0) : 0
-      },
-      discountAmount: () =>
-        Math.round(get().subtotal() * get().discountRate() * 100) / 100,
       itemCount: () =>
         get().items.reduce((sum, i) => sum + i.quantity, 0),
     }),

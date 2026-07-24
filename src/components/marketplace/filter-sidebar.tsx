@@ -10,10 +10,10 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Slider } from "@/components/ui/slider"
 import { Button } from "@/components/ui/button"
 import { RatingStars } from "@/components/rating-stars"
-import { categories } from "@/lib/data/categories"
 import { creators } from "@/lib/data/creators"
 import { materials } from "@/lib/data/materials"
 import type { MarketplaceFilters } from "./marketplace-view"
+import type { Category } from "@/lib/types"
 
 const COLOR_SWATCHES = [
   { id: "black", hex: "#1a1a1a" },
@@ -38,10 +38,16 @@ export function FilterSidebar({
   filters,
   setFilters,
   onReset,
+  showRatingFilter,
+  categories,
 }: {
   filters: MarketplaceFilters
   setFilters: React.Dispatch<React.SetStateAction<MarketplaceFilters>>
   onReset: () => void
+  // Hidden until at least one product carries a real rating — otherwise every
+  // threshold filters the whole catalog out. Computed by the parent.
+  showRatingFilter: boolean
+  categories: Category[]
 }) {
   return (
     <div className="space-y-1">
@@ -145,23 +151,25 @@ export function FilterSidebar({
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="rating">
-          <AccordionTrigger className="text-sm">Hodnotenie</AccordionTrigger>
-          <AccordionContent className="space-y-2.5">
-            {[4.5, 4, 3.5, 3].map((r) => (
-              <label key={r} className="flex items-center gap-2.5 text-sm">
-                <Checkbox
-                  checked={filters.minRating === r}
-                  onCheckedChange={() =>
-                    setFilters((f) => ({ ...f, minRating: f.minRating === r ? 0 : r }))
-                  }
-                />
-                <RatingStars rating={r} size={13} />
-                <span className="text-xs text-muted-foreground">a viac</span>
-              </label>
-            ))}
-          </AccordionContent>
-        </AccordionItem>
+        {showRatingFilter && (
+          <AccordionItem value="rating">
+            <AccordionTrigger className="text-sm">Hodnotenie</AccordionTrigger>
+            <AccordionContent className="space-y-2.5">
+              {[4.5, 4, 3.5, 3].map((r) => (
+                <label key={r} className="flex items-center gap-2.5 text-sm">
+                  <Checkbox
+                    checked={filters.minRating === r}
+                    onCheckedChange={() =>
+                      setFilters((f) => ({ ...f, minRating: f.minRating === r ? 0 : r }))
+                    }
+                  />
+                  <RatingStars rating={r} size={13} />
+                  <span className="text-xs text-muted-foreground">a viac</span>
+                </label>
+              ))}
+            </AccordionContent>
+          </AccordionItem>
+        )}
 
         <AccordionItem value="availability">
           <AccordionTrigger className="text-sm">Dostupnosť</AccordionTrigger>

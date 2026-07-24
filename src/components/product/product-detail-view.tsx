@@ -67,6 +67,7 @@ export function ProductDetailView({
   const creator = getCreatorById(product.creatorId)
 
   function handleAddToCart() {
+    if (!product.inStock) return
     addItem({
       id: `${product.id}-${material}-${color.id}-${size}`,
       productId: product.id,
@@ -194,10 +195,14 @@ export function ProductDetailView({
               <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{product.name}</h1>
               <p className="text-muted-foreground">{product.tagline}</p>
               <div className="flex items-center gap-3 pt-1">
-                <RatingStars rating={product.rating} size={16} />
-                <span className="text-sm text-muted-foreground">
-                  {product.rating.toFixed(1)} ({product.reviewCount} {dict.common.reviews})
-                </span>
+                {product.reviewCount > 0 && (
+                  <>
+                    <RatingStars rating={product.rating} size={16} />
+                    <span className="text-sm text-muted-foreground">
+                      {product.rating.toFixed(1)} ({product.reviewCount} {dict.common.reviews})
+                    </span>
+                  </>
+                )}
                 <Badge variant={product.inStock ? "default" : "secondary"} className={product.inStock ? "bg-brand-primary text-brand-primary-foreground" : ""}>
                   {product.inStock ? dict.common.inStock : dict.common.outOfStock}
                 </Badge>
@@ -295,10 +300,11 @@ export function ProductDetailView({
               <QuantityStepper value={quantity} onChange={setQuantity} />
               <Button
                 size="lg"
+                disabled={!product.inStock}
                 className="h-11 flex-1 rounded-full bg-brand-primary text-brand-primary-foreground hover:bg-brand-accent"
                 onClick={handleAddToCart}
               >
-                {dict.common.addToCart}
+                {product.inStock ? dict.common.addToCart : dict.common.outOfStock}
               </Button>
               <Button
                 size="icon"
@@ -333,7 +339,7 @@ export function ProductDetailView({
             <TabsList className="flex-wrap">
               <TabsTrigger value="description">Popis</TabsTrigger>
               <TabsTrigger value="specifications">Špecifikácie</TabsTrigger>
-              <TabsTrigger value="reviews">Recenzie ({product.reviewCount})</TabsTrigger>
+              <TabsTrigger value="reviews">Recenzie ({reviews.length})</TabsTrigger>
               <TabsTrigger value="printing">Nastavenia tlače</TabsTrigger>
               <TabsTrigger value="materials">Materiály</TabsTrigger>
               <TabsTrigger value="shipping">Doprava</TabsTrigger>
@@ -355,6 +361,9 @@ export function ProductDetailView({
             </TabsContent>
 
             <TabsContent value="reviews" className="max-w-2xl space-y-6 py-6">
+              {reviews.length === 0 && (
+                <p className="text-sm text-muted-foreground">{dict.common.noReviews}</p>
+              )}
               {reviews.map((review) => (
                 <div key={review.id} className="space-y-2 border-b border-border pb-6 last:border-0">
                   <div className="flex items-center justify-between">

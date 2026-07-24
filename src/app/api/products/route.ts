@@ -1,8 +1,18 @@
 import { NextResponse, type NextRequest } from "next/server"
-import { queryProducts, type ProductSort } from "@/lib/data/products"
+import { z } from "zod"
+import { queryProducts } from "@/lib/data/products"
 import { getCategoryBySlug } from "@/lib/data/categories"
 
-const SORTS: ProductSort[] = ["newest", "popular", "rating", "price-asc", "price-desc", "alpha"]
+// Validate + coerce query params at the trust boundary. Unknown params are
+// stripped (lenient); malformed known params return 400 with per-field detail.
+const querySchema = z.object({
+  kategoria: z.string().trim().min(1).optional(),
+  q: z.string().trim().max(100).optional(),
+  sort: z
+    .enum(["newest", "popular", "rating", "price-asc", "price-desc", "alpha"])
+    .default("newest"),
+  limit: z.coerce.number().int().positive().max(100).optional(),
+})
 
 /**
  * GET /api/products?kategoria=<slug>&q=<text>&sort=<ProductSort>&limit=<n>
@@ -10,34 +20,33 @@ const SORTS: ProductSort[] = ["newest", "popular", "rating", "price-asc", "price
  * implementation will keep returning.
  */
 export function GET(request: NextRequest) {
-  const params = request.nextUrl.searchParams
-
-  const categorySlug = params.get("kategoria") ?? undefined
-  const category = categorySlug ? getCategoryBySlug(categorySlug) : undefined
-  if (categorySlug && !category) {
+  const parsed = querySchema.safeParse(
+    Object.fromEntries(request.nextUrl.searchParams)
+  )
+  if (!parsed.success) {
     return NextResponse.json(
-      { error: `Unknown category: ${categorySlug}` },
+      {
+        error: "Invalid query parameters",
+        issues: parsed.error.issues.map((i) => ({
+          path: i.path.join("."),
+          message: i.message,
+        })),
+      },
       { status: 400 }
     )
   }
 
-  const sortParam = params.get("sort") ?? "newest"
-  if (!SORTS.includes(sortParam as ProductSort)) {
-    return NextResponse.json({ error: `Unknown sort: ${sortParam}` }, { status: 400 })
+  const { kategoria, q, sort, limit } = parsed.data
+
+  const category = kategoria ? getCategoryBySlug(kategoria) : undefined
+  if (kategoria && !category) {
+    return NextResponse.json(
+      { error: `Unknown category: ${kategoria}` },
+      { status: 400 }
+    )
   }
 
-  const limitParam = params.get("limit")
-  const limit = limitParam ? Number.parseInt(limitParam, 10) : undefined
-  if (limitParam && Number.isNaN(limit)) {
-    return NextResponse.json({ error: "limit must be a number" }, { status: 400 })
-  }
-
-  const items = queryProducts({
-    categoryId: category?.id,
-    q: params.get("q") ?? undefined,
-    sort: sortParam as ProductSort,
-    limit,
-  })
+  const items = queryProducts({ categoryId: category?.id, q, sort, limit })
 
   return NextResponse.json(
     { items, total: items.length },

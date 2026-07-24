@@ -14,6 +14,8 @@ import { testimonials } from "@/lib/data/reviews"
 import { dict } from "@/lib/i18n"
 
 export function ReviewsSection() {
+  if (testimonials.length === 0) return null
+
   return (
     <section className="py-20 sm:py-28">
       <Container className="space-y-10">

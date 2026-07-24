@@ -13,13 +13,12 @@ import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ProductCard } from "@/components/product/product-card"
-import { AuthPanel } from "@/components/account/auth-panel"
-import { useAccountStore } from "@/store/account-store"
+import { useAddressStore } from "@/store/account-store"
 import { useWishlistStore } from "@/store/wishlist-store"
-import { products } from "@/lib/data/products"
-import { mockOrders, orderStatusLabels } from "@/lib/data/orders"
+import { signOutAction } from "@/lib/auth/actions"
+import { orderStatusLabels } from "@/lib/data/order-status"
 import { formatPrice, formatDate } from "@/lib/format"
-import type { Order } from "@/lib/types"
+import type { Order, Product } from "@/lib/types"
 
 const STATUS_VARIANT: Record<Order["status"], string> = {
   delivered: "bg-brand-primary text-brand-primary-foreground",
@@ -29,21 +28,44 @@ const STATUS_VARIANT: Record<Order["status"], string> = {
   cancelled: "bg-destructive/10 text-destructive",
 }
 
-export function AccountView({ initialTab }: { initialTab?: string }) {
-  const user = useAccountStore((s) => s.user)
-  if (!user) return <AuthPanel />
-  return <Dashboard initialTab={initialTab} />
+export interface AccountUser {
+  name: string
+  email: string
 }
 
-function Dashboard({ initialTab }: { initialTab?: string }) {
-  const user = useAccountStore((s) => s.user)!
-  const logout = useAccountStore((s) => s.logout)
+export function AccountView({
+  initialTab,
+  products,
+  orders,
+  user,
+}: {
+  initialTab?: string
+  products: Product[]
+  orders: Order[]
+  user: AccountUser
+}) {
+  return (
+    <Dashboard initialTab={initialTab} products={products} orders={orders} user={user} />
+  )
+}
+
+function Dashboard({
+  initialTab,
+  products,
+  orders,
+  user,
+}: {
+  initialTab?: string
+  products: Product[]
+  orders: Order[]
+  user: AccountUser
+}) {
   const wishlistIds = useWishlistStore((s) => s.productIds)
   const wishlistProducts = products.filter((p) => wishlistIds.includes(p.id))
 
-  const addresses = useAccountStore((s) => s.addresses)
-  const addAddress = useAccountStore((s) => s.addAddress)
-  const removeAddress = useAccountStore((s) => s.removeAddress)
+  const addresses = useAddressStore((s) => s.addresses)
+  const addAddress = useAddressStore((s) => s.addAddress)
+  const removeAddress = useAddressStore((s) => s.removeAddress)
   const [newAddress, setNewAddress] = React.useState({ label: "", street: "", city: "", postalCode: "" })
 
   const [notifications, setNotifications] = React.useState({
@@ -77,10 +99,12 @@ function Dashboard({ initialTab }: { initialTab?: string }) {
             <h1 className="text-3xl font-semibold tracking-tight">Ahoj, {user.name}</h1>
             <p className="text-muted-foreground">{user.email}</p>
           </div>
-          <Button variant="outline" onClick={logout}>
-            <LogOut className="size-4" />
-            Odhlásiť sa
-          </Button>
+          <form action={signOutAction}>
+            <Button variant="outline" type="submit">
+              <LogOut className="size-4" />
+              Odhlásiť sa
+            </Button>
+          </form>
         </div>
 
         <Tabs defaultValue={initialTab ?? "orders"}>
@@ -103,7 +127,7 @@ function Dashboard({ initialTab }: { initialTab?: string }) {
           </TabsList>
 
           <TabsContent value="orders" className="space-y-4 pt-6">
-            {mockOrders.map((order) => (
+            {orders.map((order) => (
               <div key={order.id} className="rounded-2xl border border-border p-5">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                   <div>
@@ -150,7 +174,7 @@ function Dashboard({ initialTab }: { initialTab?: string }) {
           </TabsContent>
 
           <TabsContent value="downloads" className="space-y-3 pt-6">
-            {mockOrders
+            {orders
               .filter((o) => o.status === "delivered")
               .map((order) => (
                 <div

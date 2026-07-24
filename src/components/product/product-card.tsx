@@ -33,6 +33,7 @@ export function ProductCard({
   const category = getCategoryById(product.categoryIds[0])
 
   function quickAdd() {
+    if (!product.inStock) return
     addItem({
       id: `${product.id}-${product.variants.materials[0]}-${product.variants.colors[0].id}-${product.variants.sizes[0]}`,
       productId: product.id,
@@ -113,13 +114,15 @@ export function ProductCard({
 
         {!compact && (
           <div className="absolute inset-x-2.5 bottom-2.5 z-20 flex translate-y-3 gap-1.5 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100">
-            <button
-              onClick={quickAdd}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-background/95 py-2.5 text-xs font-semibold text-foreground backdrop-blur-sm hover:bg-brand-primary hover:text-brand-primary-foreground"
-            >
-              <Plus className="size-3.5" />
-              {dict.common.quickAdd}
-            </button>
+            {product.inStock && (
+              <button
+                onClick={quickAdd}
+                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-background/95 py-2.5 text-xs font-semibold text-foreground backdrop-blur-sm hover:bg-brand-primary hover:text-brand-primary-foreground"
+              >
+                <Plus className="size-3.5" />
+                {dict.common.quickAdd}
+              </button>
+            )}
             <button
               onClick={() => setQuickViewOpen(true)}
               aria-label={dict.common.quickView}
@@ -141,7 +144,7 @@ export function ProductCard({
           {product.name}
         </h3>
 
-        {!compact && (
+        {!compact && product.reviewCount > 0 && (
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <RatingStars rating={product.rating} size={11} />
             <span>

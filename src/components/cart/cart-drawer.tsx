@@ -18,9 +18,10 @@ import { Separator } from "@/components/ui/separator"
 import { QuantityStepper } from "@/components/quantity-stepper"
 import { useUIStore } from "@/store/ui-store"
 import { useCartStore } from "@/store/cart-store"
+import { computeTotals } from "@/lib/pricing"
 import { formatPrice } from "@/lib/format"
 import { dict } from "@/lib/i18n"
-import { products } from "@/lib/data/products"
+import type { Product } from "@/lib/types"
 import { ProductCard } from "@/components/product/product-card"
 
 export function CartDrawer() {
@@ -29,12 +30,18 @@ export function CartDrawer() {
   const items = useCartStore((s) => s.items)
   const updateQuantity = useCartStore((s) => s.updateQuantity)
   const removeItem = useCartStore((s) => s.removeItem)
-  const subtotal = useCartStore((s) => s.subtotal())
   const couponCode = useCartStore((s) => s.couponCode)
   const applyCoupon = useCartStore((s) => s.applyCoupon)
   const removeCoupon = useCartStore((s) => s.removeCoupon)
-  const discountAmount = useCartStore((s) => s.discountAmount())
-  const discountRate = useCartStore((s) => s.discountRate())
+
+  const totals = React.useMemo(
+    () =>
+      computeTotals(
+        items.map((i) => ({ unitPrice: i.price.amount, quantity: i.quantity })),
+        { couponCode }
+      ),
+    [items, couponCode]
+  )
 
   const [couponInput, setCouponInput] = React.useState("")
 
@@ -48,7 +55,22 @@ export function CartDrawer() {
     }
   }
 
-  const recommended = products.slice(0, 3)
+  // Recommended products load on-demand when the drawer opens, so the catalog no
+  // longer ships in every page's bundle via this layout-level component.
+  const [recommended, setRecommended] = React.useState<Product[]>([])
+  React.useEffect(() => {
+    if (!open || recommended.length > 0) return
+    let active = true
+    fetch("/api/products?limit=3")
+      .then((r) => r.json())
+      .then((data) => {
+        if (active) setRecommended(data.items ?? [])
+      })
+      .catch(() => {})
+    return () => {
+      active = false
+    }
+  }, [open, recommended.length])
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -141,14 +163,16 @@ export function CartDrawer() {
                 ))}
               </AnimatePresence>
 
-              <div className="py-5">
-                <p className="mb-2 text-sm font-medium">{dict.cart.recommended}</p>
-                <div className="grid grid-cols-2 gap-3">
-                  {recommended.map((p) => (
-                    <ProductCard key={p.id} product={p} compact />
-                  ))}
+              {recommended.length > 0 && (
+                <div className="py-5">
+                  <p className="mb-2 text-sm font-medium">{dict.cart.recommended}</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {recommended.map((p) => (
+                      <ProductCard key={p.id} product={p} compact />
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             <div className="space-y-4 border-t border-border p-4">
@@ -156,7 +180,7 @@ export function CartDrawer() {
                 <div className="flex items-center justify-between rounded-xl bg-brand-primary/10 px-3 py-2">
                   <span className="flex items-center gap-1.5 text-sm font-medium text-brand-primary">
                     <TicketPercent className="size-4" />
-                    {couponCode} (−{Math.round(discountRate * 100)} %)
+                    {couponCode} (−{Math.round(totals.discountRate * 100)} %)
                   </span>
                   <button
                     onClick={removeCoupon}
@@ -187,21 +211,21 @@ export function CartDrawer() {
               )}
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Truck className="size-3.5" />
-                {subtotal >= 60 ? dict.common.freeShipping : dict.cart.shippingAtCheckout}
+                {totals.freeShipping ? dict.common.freeShipping : dict.cart.shippingAtCheckout}
               </div>
               <Separator />
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">{dict.cart.subtotal}</span>
                   <span className="font-semibold">
-                    {formatPrice({ amount: subtotal, currency: "EUR" })}
+                    {formatPrice({ amount: totals.subtotal, currency: "EUR" })}
                   </span>
                 </div>
-                {discountAmount > 0 && (
+                {totals.discountAmount > 0 && (
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">{dict.cart.discount}</span>
                     <span className="font-semibold text-brand-primary">
-                      −{formatPrice({ amount: discountAmount, currency: "EUR" })}
+                      −{formatPrice({ amount: totals.discountAmount, currency: "EUR" })}
                     </span>
                   </div>
                 )}

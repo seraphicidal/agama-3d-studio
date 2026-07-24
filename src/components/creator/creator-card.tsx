@@ -4,14 +4,15 @@ import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Users } from "lucide-react"
-import type { Creator } from "@/lib/types"
-import { products } from "@/lib/data/products"
+import type { Creator, Product } from "@/lib/types"
 
-export function CreatorCard({ creator }: { creator: Creator }) {
-  const featured = products
-    .filter((p) => creator.featuredPrintIds.includes(p.id))
-    .slice(0, 3)
-
+export function CreatorCard({
+  creator,
+  featured,
+}: {
+  creator: Creator
+  featured: Product[]
+}) {
   return (
     <motion.div
       whileHover={{ y: -4 }}

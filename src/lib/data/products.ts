@@ -52,8 +52,12 @@ interface ProductSeed {
   license?: "personal" | "commercial"
   size: { width: number; height: number; depth: number }
   weight: number
+  /** Units available; omit for the default in-stock quantity. Set 0 for sold out. */
+  stock?: number
   daysAgo: number
 }
+
+const DEFAULT_STOCK = 25
 
 function buildProduct(seed: ProductSeed): Product {
   return {
@@ -71,8 +75,12 @@ function buildProduct(seed: ProductSeed): Product {
     images: Array.from({ length: seed.images ?? 4 }, (_, i) =>
       productImage(seed.id, i)
     ),
-    rating: seed.rating,
-    reviewCount: seed.reviewCount,
+    // Ratings/reviews are earned from real, purchase-verified reviews — none
+    // exist pre-launch. Displaying fabricated ratings breaches the EU Omnibus
+    // Directive, so these stay 0 until a real reviews table lands.
+    // seed.rating / seed.reviewCount are intentionally ignored (kept for backfill).
+    rating: 0,
+    reviewCount: 0,
     variants: {
       materials: seed.materials,
       colors: seed.colors,
@@ -81,7 +89,8 @@ function buildProduct(seed: ProductSeed): Product {
     printTimeHours: seed.printTimeHours,
     deliveryDaysMin: seed.deliveryDaysMin,
     deliveryDaysMax: seed.deliveryDaysMax,
-    inStock: true,
+    stock: seed.stock ?? DEFAULT_STOCK,
+    inStock: (seed.stock ?? DEFAULT_STOCK) > 0,
     trending: seed.trending,
     newArrival: seed.newArrival,
     featured: seed.featured,
@@ -270,6 +279,7 @@ const seeds: ProductSeed[] = [
     deliveryDaysMax: 9,
     size: { width: 30, height: 32, depth: 28 },
     weight: 520,
+    stock: 0,
     daysAgo: 15,
   },
   {
@@ -540,6 +550,7 @@ const seeds: ProductSeed[] = [
     deliveryDaysMax: 6,
     size: { width: 16, height: 14, depth: 10 },
     weight: 190,
+    stock: 0,
     daysAgo: 14,
   },
   {
