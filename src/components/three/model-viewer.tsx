@@ -136,7 +136,7 @@ export default function ModelViewer({
     if (document.fullscreenElement) {
       document.exitFullscreen()
     } else {
-      containerRef.current?.requestFullscreen?.()
+      containerRef.current?.requestFullscreen?.() 
     }
   }
 

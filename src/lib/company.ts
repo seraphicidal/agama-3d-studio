@@ -16,7 +16,7 @@ export const COMPANY = {
   vatId: "", // TODO_REPLACE: IČ DPH (VAT number), if VAT-registered
   street: "Zámocká 65/1",
   city: "Malacky",
-  postalCode: "", // TODO_REPLACE: PSČ (not provided; Malacky is 901 01 — confirm)
+  postalCode: "901 01",
   country: "Slovensko",
   contactEmail: "agamaprint3d@gmail.com",
   phone: "+421 944 771 325",

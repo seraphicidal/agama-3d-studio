@@ -25,7 +25,7 @@ export default function ContactPage() {
               <div className="flex items-start gap-3">
                 <MapPin className="mt-0.5 size-5 shrink-0 text-brand-primary" />
                 <div>
-                  <p className="font-medium">Zámocká 65/1, Malacky</p>
+                  <p className="font-medium">Zámocká 65/1, 901 01 Malacky</p>
                   <p className="text-sm text-muted-foreground">Slovensko</p>
                 </div>
               </div>

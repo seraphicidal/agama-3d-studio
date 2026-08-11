@@ -8,7 +8,7 @@ export const metadata = {
 const sections = [
   {
     title: "1. Prevádzkovateľ",
-    body: "Prevádzkovateľom osobných údajov je Agama 3D Studio, Zámocká 65/1, Malacky, Slovensko (ďalej len „prevádzkovateľ“). Kontakt: agamaprint3d@gmail.com.",
+    body: "Prevádzkovateľom osobných údajov je Agama 3D Studio, Zámocká 65/1, 901 01 Malacky, Slovensko (ďalej len „prevádzkovateľ“). Kontakt: agamaprint3d@gmail.com.",
   },
   {
     title: "2. Aké údaje spracúvame",

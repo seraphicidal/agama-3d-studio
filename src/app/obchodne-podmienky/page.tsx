@@ -8,7 +8,7 @@ export const metadata = {
 const sections = [
   {
     title: "1. Úvodné ustanovenia",
-    body: "Tieto všeobecné obchodné podmienky upravujú vzťah medzi Agama 3D Studio, Zámocká 65/1, Malacky (ďalej len „predávajúci“) a zákazníkom pri nákupe cez internetový obchod.",
+    body: "Tieto všeobecné obchodné podmienky upravujú vzťah medzi Agama 3D Studio, Zámocká 65/1, 901 01 Malacky (ďalej len „predávajúci“) a zákazníkom pri nákupe cez internetový obchod.",
   },
   {
     title: "2. Objednávka a uzavretie zmluvy",

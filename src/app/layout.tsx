@@ -58,6 +58,7 @@ const organizationJsonLd = {
     "@type": "PostalAddress",
     streetAddress: "Zámocká 65/1",
     addressLocality: "Malacky",
+    postalCode: "901 01",
     addressCountry: "SK",
   },
 };
