@@ -17,6 +17,7 @@ const baseInput: BuildOrderInput = {
   shippingMethodId: "courier",
   paymentProvider: "stripe",
   paymentReference: "cs_test_123",
+  vatRate: 0.23, // explicit: shop configured as a VAT payer for these cases
   lines: [
     { productId: "dragon-bust", name: "Dragon Bust", variant: "RESIN · Bronzová · M", unitPrice: 89, quantity: 1 },
     { productId: "baby-dragon", name: "Baby Dragon", variant: "PLA · Modrá · S", unitPrice: 24, quantity: 2 },
@@ -37,6 +38,16 @@ describe("buildOrder", () => {
     expect(o.status).toBe("processing")
     expect(o.userId).toBeNull() // guest order supported
     expect(o.paymentReference).toBe("cs_test_123")
+  })
+
+  it("omits all VAT figures when the shop is not a VAT payer", () => {
+    // §69 ods. 5: a neplatiteľ DPH must not state VAT on a sales document.
+    const o = buildOrder({ ...baseInput, vatRate: null })
+    expect(o.vatRate).toBeNull()
+    expect(o.vatAmount).toBeNull()
+    expect(o.netAmount).toBeNull()
+    expect(o.items.every((i) => i.vatAmount === null && i.vatRate === null)).toBe(true)
+    expect(o.total).toBe(137) // total is unaffected either way
   })
 
   it("applies a coupon and charges shipping when post-discount < threshold", () => {

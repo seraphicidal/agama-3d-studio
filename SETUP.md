@@ -107,12 +107,38 @@ the cart, checkout and Stripe `shipping_options` automatically.
 
 ---
 
-## 6. VAT — already on (no action unless changing)
+## 6. DPH / VAT — ⚠️ currently OFF; confirm your status before switching on
 
-VAT defaults to **23%** (SK standard) and is confirmed **VAT-inclusive** — it backs
-VAT out of the gross price and never changes the total. Keep `NEXT_PUBLIC_VAT_RATE=0.23`
-in the deployment env (or leave it unset to use the same default). Set it empty to
-disable the DPH line.
+**The shop shows no DPH line by default. This is deliberate and important.**
+
+Having a **DIČ does not make a company a VAT payer.** Only a separate registration
+under §4 zákona o DPH does, and that issues an **IČ DPH** (`SK` + 10 digits).
+
+> §69 ods. 5 zákona o DPH: *„Každá osoba, ktorá uvedie vo faktúre alebo v inom
+> doklade o predaji daň, je povinná zaplatiť túto daň.“*
+
+So if you are **not** registered and the shop prints "z toho DPH 23 %", you owe the
+state that VAT — with no right to deduct input VAT. Pure loss. Conversely, if you
+**are** registered, removing the line doesn't remove the liability (you'd still owe
+≈23/123 of each sale) and the invoice becomes defective.
+
+**Do this, in order:**
+1. Verify the company's status in the Financial Administration's public register:
+   https://www.financnasprava.sk/sk/elektronicke-sluzby/verejne-sluzby/overovanie-ic-dph
+2. Have your **účtovník** confirm it and sign off on the invoice template.
+3. Only then, if registered, set `NEXT_PUBLIC_IS_VAT_PAYER=true`
+   (rate defaults to `NEXT_PUBLIC_VAT_RATE=0.23`, the SK standard).
+   If **not** registered, leave it `false` and have the invoice state
+   *„Nie sme platiteľmi DPH.“*
+
+Registration thresholds to watch (per calendar year, resets 1 Jan): **€50,000**
+→ register, payer from 1 Jan next year; **€62,500** → payer *immediately*, on the
+supply that breaches it. The code stores `vat_rate` per order and per line, so
+switching on later does not corrupt historical orders.
+
+Ask your účtovník separately about **§7a**: buying EU-invoiced services (Google/Meta
+ads, and arguably parts of this stack) can trigger a registration duty for a
+non-payer *regardless of turnover*.
 
 ---
 

@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest"
-import { computeTotals, normalizeCoupon, DEFAULT_VAT_RATE } from "./index"
+import {
+  computeTotals,
+  normalizeCoupon,
+  resolveVatRate,
+  DEFAULT_VAT_RATE,
+} from "./index"
 
 const line = (unitPrice: number, quantity = 1) => ({ unitPrice, quantity })
 
@@ -72,13 +77,33 @@ describe("computeTotals — VAT (inclusive, backed out)", () => {
     expect(t.netAmount).toBeCloseTo(72.36, 2) // 89/1.23
     expect((t.netAmount ?? 0) + (t.vatAmount ?? 0)).toBeCloseTo(89, 2)
   })
-  it("defaults to 23% and leaves the total unchanged", () => {
-    const withVat = computeTotals([line(100)], { shippingMethodId: "pickup" })
+  it("uses 23% as the SK standard rate and leaves the total unchanged", () => {
+    const withVat = computeTotals([line(100)], { shippingMethodId: "pickup", vatRate: 0.23 })
     const noVat = computeTotals([line(100)], { shippingMethodId: "pickup", vatRate: null })
     expect(DEFAULT_VAT_RATE).toBe(0.23)
     expect(withVat.vatRate).toBe(0.23)
     expect(withVat.total).toBe(noVat.total) // 100 either way
     expect(noVat.vatAmount).toBeNull()
+  })
+})
+
+// §69 ods. 5 zákona o DPH: stating VAT on a sales document obliges you to pay it.
+// A non-VAT-registered shop must therefore show NO DPH line at all.
+describe("resolveVatRate — VAT is off unless registered", () => {
+  it("returns null when the shop is NOT a VAT payer, even if a rate is set", () => {
+    expect(resolveVatRate({ isVatPayer: false })).toBeNull()
+    expect(resolveVatRate({ isVatPayer: false, rawRate: "0.23" })).toBeNull()
+  })
+  it("defaults to the SK standard rate when the shop IS a VAT payer", () => {
+    expect(resolveVatRate({ isVatPayer: true })).toBe(0.23)
+    expect(resolveVatRate({ isVatPayer: true, rawRate: "" })).toBe(0.23)
+  })
+  it("honours an explicit rate for a VAT payer", () => {
+    expect(resolveVatRate({ isVatPayer: true, rawRate: "0.19" })).toBe(0.19)
+  })
+  it("ignores a malformed rate", () => {
+    expect(resolveVatRate({ isVatPayer: true, rawRate: "abc" })).toBeNull()
+    expect(resolveVatRate({ isVatPayer: true, rawRate: "-1" })).toBeNull()
   })
   it("VAT applies to the shipping-inclusive total", () => {
     const t = computeTotals([line(9)], { shippingMethodId: "courier", vatRate: 0.23 })

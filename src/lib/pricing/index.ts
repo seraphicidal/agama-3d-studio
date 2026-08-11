@@ -30,23 +30,38 @@ export type { ShippingMethod }
 // callers won't change shape. Defined here so client + server validate identically.
 export const COUPONS: Record<string, number> = { AGAMA10: 0.1 }
 
-// Slovak standard DPH (VAT) rate. Catalog prices are VAT-INCLUSIVE (gross), so
-// this only affects the informational "z toho DPH" breakdown — VAT is BACKED OUT
-// of the gross total (vat = total − total/(1+rate)), never added on top, so the
-// payable total is identical whether shown or not. A DPH breakdown is legally
-// required for SK B2C, so VAT is ON by default at 23%. Override with the env var
-// NEXT_PUBLIC_VAT_RATE (set to "" to disable, or another decimal for a new rate).
+// Slovak standard DPH (VAT) rate, used ONLY when the shop is a registered VAT
+// payer (platiteľ DPH). Catalog prices are VAT-INCLUSIVE (gross), so this only
+// affects the informational "z toho DPH" breakdown — VAT is BACKED OUT of the
+// gross total (vat = total − total/(1+rate)), never added on top.
 export const DEFAULT_VAT_RATE = 0.23
 
-function resolveConfiguredVatRate(): number | null {
-  const raw = process.env.NEXT_PUBLIC_VAT_RATE
-  if (raw === undefined) return DEFAULT_VAT_RATE
-  if (raw.trim() === "") return null
+// ⚠️ SAFETY DEFAULT: OFF. Showing a DPH line while NOT registered for VAT is not
+// a cosmetic error — §69 ods. 5 zákona o DPH: "Každá osoba, ktorá uvedie vo
+// faktúre alebo v inom doklade o predaji daň, je povinná zaplatiť túto daň",
+// i.e. stating VAT on a sales document creates a real debt to the Financial
+// Administration, with no right to deduct input VAT. Having a DIČ does NOT make
+// a company a VAT payer — only a §4 registration (which issues an IČ DPH) does.
+// Verify status at financnasprava.sk (overovanie IČ DPH) and have an účtovník
+// confirm, THEN set NEXT_PUBLIC_IS_VAT_PAYER=true. See SETUP.md → DPH.
+export const IS_VAT_PAYER = process.env.NEXT_PUBLIC_IS_VAT_PAYER === "true"
+
+/** Exported for testing: resolves the effective VAT rate from config. */
+export function resolveVatRate(opts: {
+  isVatPayer: boolean
+  rawRate?: string
+}): number | null {
+  if (!opts.isVatPayer) return null
+  const raw = opts.rawRate
+  if (raw === undefined || raw.trim() === "") return DEFAULT_VAT_RATE
   const parsed = Number(raw)
   return Number.isNaN(parsed) || parsed <= 0 ? null : parsed
 }
 
-export const VAT_RATE: number | null = resolveConfiguredVatRate()
+export const VAT_RATE: number | null = resolveVatRate({
+  isVatPayer: IS_VAT_PAYER,
+  rawRate: process.env.NEXT_PUBLIC_VAT_RATE,
+})
 
 export function normalizeCoupon(code: string | null | undefined): string | null {
   if (!code) return null

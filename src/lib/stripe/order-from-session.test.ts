@@ -36,7 +36,7 @@ describe("buildOrderInputFromSession → buildOrder", () => {
     expect(input.customerEmail).toBe("guest@example.sk")
     expect(input.address.city).toBe("Bratislava")
 
-    const order = buildOrder(input)
+    const order = buildOrder({ ...input, vatRate: 0.23 })
     expect(order.number).toBe("AGM-TEST1")
     expect(order.items[0].unitPrice).toBe(42) // cents → EUR
     expect(order.discountCode).toBe("AGAMA10")

@@ -22,6 +22,13 @@ export interface BuildOrderInput {
   paymentProvider: string
   paymentReference: string
   lines: BuildOrderLine[]
+  /**
+   * VAT rate in force for this order; omit to use the shop's configured setting
+   * (null / no DPH line unless the shop is a registered VAT payer). Persisted per
+   * order + per line so historical orders stay correct if the status later changes
+   * (e.g. crossing the registration threshold mid-year).
+   */
+  vatRate?: number | null
 }
 
 const round2 = (n: number) => Math.round(n * 100) / 100
@@ -54,6 +61,7 @@ export function buildOrder(input: BuildOrderInput): OrderRecord {
   const totals = computeTotals(priced, {
     couponCode: input.couponCode,
     shippingMethodId: input.shippingMethodId,
+    ...(input.vatRate !== undefined ? { vatRate: input.vatRate } : {}),
   })
 
   const items: OrderLineItem[] = input.lines.map((l) => {
