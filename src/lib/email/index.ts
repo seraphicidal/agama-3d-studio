@@ -1,7 +1,3 @@
-// Pluggable transactional email. Default is a no-op console logger so order
-// flows work locally and in CI without an email account; set RESEND_API_KEY +
-// EMAIL_FROM to send for real. Swap providers by implementing EmailProvider.
-
 export interface EmailMessage {
   to: string
   subject: string
@@ -14,7 +10,6 @@ export interface EmailProvider {
   send(message: EmailMessage): Promise<void>
 }
 
-// Safe default: logs instead of sending.
 const consoleProvider: EmailProvider = {
   name: "console",
   async send(message) {
@@ -25,8 +20,6 @@ const consoleProvider: EmailProvider = {
   },
 }
 
-// Resend chosen for GDPR: it offers EU data residency (create the API key in an
-// EU region). REST call (no SDK dependency) keeps this swappable and light.
 function resendProvider(apiKey: string): EmailProvider {
   return {
     name: "resend",

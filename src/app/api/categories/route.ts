@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server"
 import { getCategoriesWithCounts } from "@/lib/data/catalog"
 
-/** GET /api/categories — full category list with product counts. */
 export function GET() {
   const items = getCategoriesWithCounts()
   return NextResponse.json(

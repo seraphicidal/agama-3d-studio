@@ -10,8 +10,6 @@ import type { Product } from "@/lib/types"
 import { dict } from "@/lib/i18n"
 
 export function WishlistView({ products }: { products: Product[] }) {
-  // Wishlist lives in localStorage; render after mount to avoid an
-  // SSR (always empty) vs client (persisted) mismatch.
   const [mounted, setMounted] = React.useState(false)
   const wishlistIds = useWishlistStore((s) => s.productIds)
 

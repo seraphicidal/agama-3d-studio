@@ -51,8 +51,6 @@ export function Header() {
   })
 
   React.useEffect(() => {
-    // Deliberate: next-themes' recommended pattern to defer theme-dependent
-    // UI (the sun/moon icon) until after client mount, avoiding a hydration mismatch.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
   }, [])

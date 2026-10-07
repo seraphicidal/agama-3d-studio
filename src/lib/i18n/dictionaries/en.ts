@@ -1,8 +1,5 @@
 import type { Dictionary } from "./sk"
 
-// Complete English dictionary. Not yet wired into the UI (the site ships
-// Slovak-only for now) — launching English later means routing `locale`
-// through `getDictionary()`, not writing new copy.
 const en: Dictionary = {
   meta: {
     siteName: "Agama 3D Studio",

@@ -48,7 +48,6 @@ describe("computeTotals — shipping", () => {
     expect(t.shipping).toBe(0)
   })
   it("free-shipping threshold is POST-discount (audit fix)", () => {
-    // 64 pre-discount is >= 60, but AGAMA10 drops it to 57.6 (< 60) → charged.
     const t = computeTotals([line(42), line(22)], {
       couponCode: "AGAMA10",
       shippingMethodId: "courier",
@@ -71,10 +70,10 @@ describe("computeTotals — shipping", () => {
 describe("computeTotals — VAT (inclusive, backed out)", () => {
   it("backs VAT out of the gross total and does NOT change the price", () => {
     const t = computeTotals([line(89)], { shippingMethodId: "pickup", vatRate: 0.23 })
-    expect(t.total).toBe(89) // price unchanged — VAT is not added on top
+    expect(t.total).toBe(89)
     expect(t.vatRate).toBe(0.23)
-    expect(t.vatAmount).toBeCloseTo(16.64, 2) // 89 − 89/1.23
-    expect(t.netAmount).toBeCloseTo(72.36, 2) // 89/1.23
+    expect(t.vatAmount).toBeCloseTo(16.64, 2)
+    expect(t.netAmount).toBeCloseTo(72.36, 2)
     expect((t.netAmount ?? 0) + (t.vatAmount ?? 0)).toBeCloseTo(89, 2)
   })
   it("uses 23% as the SK standard rate and leaves the total unchanged", () => {
@@ -82,13 +81,11 @@ describe("computeTotals — VAT (inclusive, backed out)", () => {
     const noVat = computeTotals([line(100)], { shippingMethodId: "pickup", vatRate: null })
     expect(DEFAULT_VAT_RATE).toBe(0.23)
     expect(withVat.vatRate).toBe(0.23)
-    expect(withVat.total).toBe(noVat.total) // 100 either way
+    expect(withVat.total).toBe(noVat.total)
     expect(noVat.vatAmount).toBeNull()
   })
 })
 
-// §69 ods. 5 zákona o DPH: stating VAT on a sales document obliges you to pay it.
-// A non-VAT-registered shop must therefore show NO DPH line at all.
 describe("resolveVatRate — VAT is off unless registered", () => {
   it("returns null when the shop is NOT a VAT payer, even if a rate is set", () => {
     expect(resolveVatRate({ isVatPayer: false })).toBeNull()

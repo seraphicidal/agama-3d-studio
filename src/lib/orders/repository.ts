@@ -1,9 +1,6 @@
 import type { OrderRecord } from "./types"
 import { createSupabaseAdminClient } from "@/lib/supabase/server"
 
-// Persists placed orders via the service-role client (bypasses RLS). SERVER-ONLY.
-// Throws cleanly (via the admin client) when Supabase isn't configured.
-
 const cents = (n: number) => Math.round(n * 100)
 
 export async function saveOrder(order: OrderRecord): Promise<void> {
@@ -53,7 +50,6 @@ export async function saveOrder(order: OrderRecord): Promise<void> {
   if (itemsError) throw new Error(`Failed to save order items: ${itemsError.message}`)
 }
 
-// Webhook idempotency: Stripe may deliver the same event more than once.
 export async function orderExistsByPaymentReference(reference: string): Promise<boolean> {
   const supabase = createSupabaseAdminClient()
   const { data } = await supabase

@@ -154,10 +154,6 @@ export function CustomOrderWizard() {
       if (Object.keys(nextErrors).length > 0) return
     }
     if (step === STEPS.length - 1) {
-      // Defensive re-validation at the submit boundary. The Stepper already
-      // disables forward navigation (indices > current), so this is normally
-      // only reached after each step's gate — but never let a submit through
-      // with a missing file or invalid contact details.
       if (!state.file) {
         setStep(0)
         toast.error(dict.wizard.fileRequired)
@@ -484,7 +480,6 @@ export function CustomOrderWizard() {
             )}
           </div>
 
-          {/* Price summary sidebar */}
           <div className="h-fit space-y-4 rounded-2xl bg-secondary p-5">
             <p className="text-sm font-medium">{dict.wizard.estimatedPrice}</p>
             <div className="space-y-2 text-sm text-muted-foreground">

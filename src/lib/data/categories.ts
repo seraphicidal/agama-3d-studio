@@ -1,11 +1,6 @@
 import type { Category } from "@/lib/types"
 import { categoryImage } from "./images"
 
-// Pure reference data — intentionally does NOT import the product catalog, so
-// that client components using getCategoryById/BySlug (e.g. product cards, which
-// only need the category name) don't drag the whole catalog into their bundle.
-// Real per-category counts are joined server-side by getCategoriesWithCounts()
-// in ./catalog — the only module that couples categories to products.
 export type CategoryBase = Omit<Category, "productCount">
 
 export const categories: CategoryBase[] = [

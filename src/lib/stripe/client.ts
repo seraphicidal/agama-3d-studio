@@ -4,12 +4,6 @@ import { getProductBySlug } from "@/lib/data/products"
 import { SHIPPING_METHODS, getShippingMethod } from "@/lib/shipping"
 import { COUPONS, normalizeCoupon, computeTotals } from "@/lib/pricing"
 
-// SERVER-ONLY. Do not import from a Client Component — it pulls in the Stripe
-// Node SDK and reads the secret key. The single checkout seam
-// (lib/payments/createCheckoutSession) routes here for cards + Apple Pay.
-
-// Minimal, server-authoritative line input: only ids + variant are trusted from
-// the client; prices are always resolved from the catalog here.
 export interface CheckoutLineInput {
   productId: string
   quantity: number
@@ -39,8 +33,6 @@ export function isStripeConfigured() {
   return Boolean(process.env.STRIPE_SECRET_KEY)
 }
 
-// For the webhook route: signature verification + line-item retrieval. Throws
-// cleanly if unconfigured (guard with isStripeConfigured() first).
 export function getStripeClient(): Stripe {
   return getStripe()
 }
@@ -55,17 +47,12 @@ function getStripe(): Stripe {
       "Stripe is not configured. Set STRIPE_SECRET_KEY (server-only; see .env.example)."
     )
   }
-  // Pinned to the installed SDK's API version; a TS error here after an SDK bump
-  // is a useful prompt to review the upgrade.
   stripeSingleton = new Stripe(secretKey, { apiVersion: "2026-06-24.dahlia" })
   return stripeSingleton
 }
 
 const eurToCents = (n: number) => Math.round(n * 100)
 
-// Stripe shipping options from the shipping config (max 5). When the cart already
-// qualifies for free shipping (our server-authoritative rule), a free option is
-// offered up front.
 function buildShippingOptions(
   freeEligible: boolean
 ): Stripe.Checkout.SessionCreateParams.ShippingOption[] {
@@ -104,9 +91,6 @@ export async function createCheckoutSession(
 ): Promise<CheckoutSessionResult> {
   const stripe = getStripe()
 
-  // Server-authoritative: every line is priced from the catalog by product id;
-  // the client never sets prices. tax_behavior "inclusive" matches our VAT-inclusive
-  // catalog prices (Stripe Tax must be enabled + an origin registered — see SETUP.md).
   const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = input.items.map(
     (item) => {
       const product = getProductBySlug(item.productId)
@@ -129,7 +113,6 @@ export async function createCheckoutSession(
     }
   )
 
-  // Free-shipping eligibility comes from our engine (post-discount rule).
   const totals = computeTotals(
     input.items.map((i) => {
       const p = getProductBySlug(i.productId)

@@ -44,8 +44,6 @@ export function FilterSidebar({
   filters: MarketplaceFilters
   setFilters: React.Dispatch<React.SetStateAction<MarketplaceFilters>>
   onReset: () => void
-  // Hidden until at least one product carries a real rating — otherwise every
-  // threshold filters the whole catalog out. Computed by the parent.
   showRatingFilter: boolean
   categories: Category[]
 }) {

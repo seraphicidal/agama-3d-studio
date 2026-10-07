@@ -2,12 +2,6 @@ import type { NextConfig } from "next";
 
 const isDev = process.env.NODE_ENV !== "production";
 
-// Content Security Policy. Notes:
-// - `'unsafe-inline'` for script-src is currently required because Next injects
-//   inline bootstrap/streaming scripts and this app has no nonce middleware yet.
-//   Hardening to a nonce-based policy (via proxy.ts) is a tracked follow-up.
-// - `'unsafe-eval'` and `ws:`/`wss:` are dev-only (React Fast Refresh + HMR).
-// - Remote image hosts must match next.config `images.remotePatterns` below.
 const csp = [
   "default-src 'self'",
   "base-uri 'self'",

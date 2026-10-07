@@ -1,5 +1,3 @@
-// NOTE: deliberately NOT `as const` — the Dictionary type must widen to `string`
-// so the English dictionary can satisfy it with different literals.
 const sk = {
   meta: {
     siteName: "Agama 3D Studio",

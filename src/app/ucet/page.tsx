@@ -15,7 +15,6 @@ export default async function AccountPage({
   const params = await searchParams
   const tab = typeof params.tab === "string" ? params.tab : undefined
 
-  // Auth is env-gated: without Supabase the page renders a clear notice.
   if (!isSupabaseConfigured()) {
     return <AuthPanel notConfigured />
   }

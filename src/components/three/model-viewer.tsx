@@ -15,18 +15,13 @@ export interface ModelViewerProps {
   variant?: ModelVariant
   color?: string
   className?: string
-  /** Show the "sample model" disclaimer badge (on by default). */
   note?: boolean
 }
 
-// Procedural stand-ins until real product scans exist. Swapping in a GLB later:
-// add `src?: string`, and when set render drei's `useGLTF(src)` scene instead of
-// these meshes (self-host any Draco decoder — no runtime CDN fetches).
 function useVariantGeometry(variant: ModelVariant) {
   return React.useMemo(() => {
     switch (variant) {
       case "vase": {
-        // Lathe profile with a slight ripple — evokes vase-mode print layers.
         const points: THREE.Vector2[] = []
         const STEPS = 120
         for (let i = 0; i <= STEPS; i++) {
@@ -122,10 +117,6 @@ export default function ModelViewer({
   }, [])
 
   React.useEffect(() => {
-    // The first ResizeObserver measurement can land before this lazy-mounted
-    // canvas has final layout, leaving the 300×150 default buffer. A few
-    // spaced resize nudges make R3F re-measure; harmless where not needed
-    // (an immediate next-frame nudge proved too early in testing).
     const timers = [100, 400, 1200].map((ms) =>
       window.setTimeout(() => window.dispatchEvent(new Event("resize")), ms)
     )

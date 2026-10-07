@@ -32,7 +32,6 @@ export function ContactForm() {
   })
 
   function onSubmit(_values: ContactValues) {
-    // Submission endpoint pending backend wiring — see supabase/schema.sql.
     toast.success("Správa odoslaná, ozveme sa čo najskôr!")
     form.reset()
   }

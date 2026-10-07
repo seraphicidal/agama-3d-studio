@@ -1,14 +1,9 @@
 import type { BuildOrderInput } from "@/lib/orders/build"
 import type { OrderAddress } from "@/lib/orders/types"
 
-// Deliberately decoupled from Stripe's SDK types so it can be unit-tested with a
-// plain mock. The webhook route adapts the real Stripe Session + line items into
-// these shapes.
-
 export interface SessionLineItemLike {
   description: string | null
   quantity: number | null
-  /** Unit amount in cents (VAT-inclusive catalog price we set at checkout). */
   unitAmount: number | null
   productId: string | null
   variant: string | null
@@ -17,7 +12,6 @@ export interface SessionLineItemLike {
 export interface SessionLike {
   metadata: Record<string, string> | null | undefined
   customerEmail: string | null | undefined
-  /** payment_intent id (preferred) or session id. */
   paymentReference: string
 }
 
@@ -34,15 +28,11 @@ function parseAddress(raw: string | undefined): OrderAddress {
         phone: a.phone ? String(a.phone) : undefined,
       }
     } catch {
-      // fall through to empty address
     }
   }
   return { fullName: "", street: "", city: "", postalCode: "", country: "Slovensko" }
 }
 
-// Rebuilds order input from a completed Stripe session. Prices come from the line
-// items we set server-side; discount + shipping method come from our metadata, so
-// buildOrder recomputes totals with the shared (tested) pricing formula.
 export function buildOrderInputFromSession(
   session: SessionLike,
   lineItems: SessionLineItemLike[],

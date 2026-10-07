@@ -73,8 +73,6 @@ export function CheckoutFlow() {
   const [processing, setProcessing] = React.useState(false)
   const [confirmationEmail, setConfirmationEmail] = React.useState("")
 
-  // Client-side display estimate via the shared pricing formula. The server
-  // re-derives the authoritative figure from product ids at /api/checkout/quote.
   const totals = React.useMemo(
     () =>
       computeTotals(
@@ -111,9 +109,6 @@ export function CheckoutFlow() {
     setProcessing(true)
     setConfirmationEmail(shippingInfo.email)
 
-    // Ask the server to create a Stripe Checkout Session (server-authoritative:
-    // it re-prices from the catalog). If Stripe isn't configured the route returns
-    // 503 and we fall back to the demo confirmation so the flow still completes.
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
@@ -141,12 +136,11 @@ export function CheckoutFlow() {
       if (res.ok) {
         const data: { url?: string } = await res.json()
         if (data.url) {
-          window.location.href = data.url // → Stripe-hosted payment page
+          window.location.href = data.url
           return
         }
       }
     } catch {
-      // fall through to the demo confirmation
     }
 
     setProcessing(false)

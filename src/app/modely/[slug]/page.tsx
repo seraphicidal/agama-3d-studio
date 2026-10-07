@@ -59,8 +59,6 @@ export default async function ProductPage({
         : "https://schema.org/OutOfStock",
       itemCondition: "https://schema.org/NewCondition",
     },
-    // Only emit aggregateRating with real reviews — fabricated structured-data
-    // ratings breach the Omnibus Directive and Google's review-snippet policy.
     ...(product.reviewCount > 0
       ? {
           aggregateRating: {

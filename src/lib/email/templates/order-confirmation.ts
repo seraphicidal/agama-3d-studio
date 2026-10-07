@@ -5,8 +5,6 @@ import { BRAND_NAME, COMPANY, legalIdentityComplete } from "@/lib/company"
 
 const eur = (n: number) => formatPrice({ amount: n, currency: "EUR" })
 
-// SK-language order confirmation with the DPH (VAT) breakdown required for SK
-// B2C. Prices are VAT-inclusive; the "z toho DPH" line shows the backed-out VAT.
 export function renderOrderConfirmation(order: OrderRecord): {
   subject: string
   html: string

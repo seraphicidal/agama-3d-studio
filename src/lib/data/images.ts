@@ -1,7 +1,3 @@
-// Central place for imagery. Every URL below was verified (via browser fetch)
-// to resolve to a real photo before being added here — swapping in actual
-// product photography later means editing this file only.
-
 function unsplash(id: string, w = 1000, h = 1000) {
   return `https://images.unsplash.com/${id}?q=80&w=${w}&h=${h}&auto=format&fit=crop`
 }

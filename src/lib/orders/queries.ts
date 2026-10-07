@@ -2,9 +2,6 @@ import type { Order, CartItem } from "@/lib/types"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 import { getProductBySlug } from "@/lib/data/products"
 
-// User-scoped order reads (RLS lets a user see only their own). Distinct from
-// repository.ts, which does privileged writes via the service role.
-
 interface OrderItemRow {
   product_id: string | null
   name: string

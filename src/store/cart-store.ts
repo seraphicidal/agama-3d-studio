@@ -9,7 +9,6 @@ interface CartState {
   addItem: (item: CartItem) => void
   removeItem: (id: string) => void
   updateQuantity: (id: string, quantity: number) => void
-  /** Validates against known codes; returns whether the code was accepted. */
   applyCoupon: (code: string) => boolean
   removeCoupon: () => void
   clear: () => void

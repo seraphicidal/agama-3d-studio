@@ -3,10 +3,6 @@ import { z } from "zod"
 import { getProductBySlug } from "@/lib/data/products"
 import { computeTotals, type PricedLine } from "@/lib/pricing"
 
-// Server-authoritative order quote. The client sends only product ids + quantities
-// (plus optional coupon / shipping choice) — prices come from the catalog here, so
-// a tampered client cart can never change what is charged. This is the seam order
-// creation and the Stripe session will call.
 const bodySchema = z.object({
   items: z
     .array(

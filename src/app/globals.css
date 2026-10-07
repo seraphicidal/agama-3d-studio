@@ -149,7 +149,6 @@
   html {
     @apply font-sans scroll-smooth;
   }
-  /* Display face for all headings — Sora, slightly tightened */
   h1, h2, h3, h4 {
     @apply font-heading;
     letter-spacing: -0.01em;

@@ -12,7 +12,6 @@ function ViewerSkeleton() {
   )
 }
 
-// three.js stays out of the main bundle — loaded only when a viewer mounts.
 export const ModelViewerLazy = dynamic<ModelViewerProps>(
   () => import("./model-viewer"),
   { ssr: false, loading: ViewerSkeleton }

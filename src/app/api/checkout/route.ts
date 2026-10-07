@@ -38,8 +38,6 @@ const bodySchema = z.object({
   address: addressSchema.optional(),
 })
 
-// Creates a Stripe Checkout Session from the cart. Server-authoritative: the
-// Stripe layer re-prices every line from the catalog by product id.
 export async function POST(request: Request) {
   if (!isStripeConfigured()) {
     return NextResponse.json({ error: "Payments are not configured yet." }, { status: 503 })
@@ -65,7 +63,6 @@ export async function POST(request: Request) {
 
   const { items, couponCode, shippingMethodId, customerEmail, customerName, address } = parsed.data
 
-  // Validate ids + stock server-side before taking a payment.
   for (const item of items) {
     const product = getProductBySlug(item.productId)
     if (!product) {
@@ -76,7 +73,6 @@ export async function POST(request: Request) {
     }
   }
 
-  // Attach the authenticated user when available; otherwise it's a guest order.
   let userId: string | null = null
   if (isSupabaseConfigured()) {
     try {

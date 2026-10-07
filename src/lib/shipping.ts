@@ -1,16 +1,8 @@
-// Shipping options for cart, checkout and Stripe `shipping_options`.
-//
-// ⚠️ TODO_REPLACE: every `price` below is a PLACEHOLDER based on typical Slovak
-// e-shop rates. Confirm/replace with your negotiated carrier prices before
-// launch (see SETUP.md → Shipping). Prices are VAT-inclusive EUR.
-
 export interface ShippingMethod {
   id: string
-  /** SK-facing label. */
   label: string
   description: string
   carrier: string
-  /** VAT-inclusive EUR. PLACEHOLDER — replace with a real negotiated rate. */
   price: number
   estimatedDaysMin: number
   estimatedDaysMax: number
@@ -57,11 +49,8 @@ export const SHIPPING_METHODS: ShippingMethod[] = [
 
 export const DEFAULT_SHIPPING_METHOD_ID = "courier"
 
-// Free shipping over this POST-discount subtotal (EUR). PLACEHOLDER — confirm.
 export const FREE_SHIPPING_THRESHOLD = 60
 
-// Which amount qualifies for free shipping. "post-discount" fixes the audit bug
-// where a coupon could still earn free shipping after dropping below threshold.
 export const FREE_SHIPPING_BASIS: "pre-discount" | "post-discount" = "post-discount"
 
 export function getShippingMethod(id: string | undefined): ShippingMethod {

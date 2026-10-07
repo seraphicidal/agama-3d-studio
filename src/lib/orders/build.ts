@@ -5,7 +5,6 @@ export interface BuildOrderLine {
   productId: string
   name: string
   variant: string
-  /** Authoritative unit price (VAT-inclusive) — must come from the catalog, not the client. */
   unitPrice: number
   quantity: number
 }
@@ -22,19 +21,11 @@ export interface BuildOrderInput {
   paymentProvider: string
   paymentReference: string
   lines: BuildOrderLine[]
-  /**
-   * VAT rate in force for this order; omit to use the shop's configured setting
-   * (null / no DPH line unless the shop is a registered VAT payer). Persisted per
-   * order + per line so historical orders stay correct if the status later changes
-   * (e.g. crossing the registration threshold mid-year).
-   */
   vatRate?: number | null
 }
 
 const round2 = (n: number) => Math.round(n * 100) / 100
 
-// Human-readable order reference. Uniqueness is ultimately enforced by the DB
-// unique constraint on orders.number (retry on the rare collision).
 export function generateOrderNumber(): string {
   const stamp = Date.now().toString(36).toUpperCase().slice(-5)
   const rand = Math.floor(Math.random() * 36 ** 2)
@@ -50,9 +41,6 @@ function backOutVat(grossAmount: number, rate: number | null) {
   return { vatAmount, netAmount: round2(grossAmount - vatAmount) }
 }
 
-// Server-authoritative order construction. Totals are recomputed from the given
-// (catalog-sourced) line prices via the shared pricing formula; VAT is backed
-// out of the VAT-inclusive amounts per-line and for the order as a whole.
 export function buildOrder(input: BuildOrderInput): OrderRecord {
   const priced: PricedLine[] = input.lines.map((l) => ({
     unitPrice: l.unitPrice,

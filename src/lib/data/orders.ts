@@ -52,5 +52,3 @@ export const mockOrders: Order[] = [
   },
 ]
 
-// Status labels moved to ./order-status (pure) so client components importing
-// them don't pull this products-dependent module into their bundle.

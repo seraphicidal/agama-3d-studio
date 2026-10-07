@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server"
 import { getProductBySlug } from "@/lib/data/products"
 
-/** GET /api/products/:slug — single product detail. */
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ slug: string }> }

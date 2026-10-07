@@ -9,8 +9,6 @@ import { sendEmail } from "@/lib/email"
 
 export const runtime = "nodejs"
 
-// Stripe webhook: on payment success, records the order (server-authoritative)
-// and sends the confirmation email. Signature-verified + idempotent.
 export async function POST(request: Request) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
   if (!isStripeConfigured() || !webhookSecret) {
@@ -40,7 +38,6 @@ export async function POST(request: Request) {
     const paymentReference =
       typeof session.payment_intent === "string" ? session.payment_intent : session.id
 
-    // Idempotency: Stripe may deliver an event more than once.
     if (!(await orderExistsByPaymentReference(paymentReference))) {
       const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
         expand: ["data.price.product"],
@@ -72,8 +69,6 @@ export async function POST(request: Request) {
       const order = buildOrder(input)
       await saveOrder(order)
 
-      // Don't fail the webhook on email errors — that would trigger Stripe
-      // retries and duplicate order attempts. Log and continue.
       try {
         if (order.customerEmail) {
           await sendEmail({ to: order.customerEmail, ...renderOrderConfirmation(order) })

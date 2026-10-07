@@ -14,8 +14,6 @@ const SLIDES = Array.from({ length: 6 }, (_, i) => heroImage(i))
 
 export function Hero() {
   const [index, setIndex] = React.useState(0)
-  // Mount the 3D canvas only on desktop — `hidden lg:block` alone would still
-  // load three.js and render offscreen on phones.
   const [isDesktop, setIsDesktop] = React.useState(false)
 
   React.useEffect(() => {

@@ -113,7 +113,6 @@ export function ProductDetailView({
         </Breadcrumb>
 
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-14">
-          {/* Gallery */}
           <div className="space-y-3">
             <div className="group relative aspect-square overflow-hidden rounded-2xl bg-secondary">
               {view360 ? (
@@ -181,7 +180,6 @@ export function ProductDetailView({
             </div>
           </div>
 
-          {/* Info */}
           <div className="space-y-6">
             <div className="space-y-2">
               {creator && (
@@ -333,7 +331,6 @@ export function ProductDetailView({
           </div>
         </div>
 
-        {/* Tabs */}
         <div className="mt-16">
           <Tabs defaultValue="description">
             <TabsList className="flex-wrap">
@@ -422,7 +419,6 @@ export function ProductDetailView({
           </Tabs>
         </div>
 
-        {/* Related */}
         {related.length > 0 && (
           <div className="mt-16">
             <SectionHeading title="Podobné modely" className="mb-8" />

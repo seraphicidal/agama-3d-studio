@@ -55,8 +55,6 @@ export function CartDrawer() {
     }
   }
 
-  // Recommended products load on-demand when the drawer opens, so the catalog no
-  // longer ships in every page's bundle via this layout-level component.
   const [recommended, setRecommended] = React.useState<Product[]>([])
   React.useEffect(() => {
     if (!open || recommended.length > 0) return

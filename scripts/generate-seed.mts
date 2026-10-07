@@ -1,7 +1,3 @@
-// Generates supabase/seed.sql from the mock catalog (the single source of truth).
-// Run with: npm run db:seed:generate
-// Only relative runtime imports are used (type-only "@/..." imports are erased),
-// so this runs under tsx without path-alias resolution.
 import { writeFileSync } from "node:fs"
 import { products } from "../src/lib/data/products"
 import { categories } from "../src/lib/data/categories"

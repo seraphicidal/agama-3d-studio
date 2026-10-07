@@ -33,9 +33,6 @@ interface SearchSection {
   items: SearchItem[]
 }
 
-// Hand-rolled command palette. Deliberately NOT cmdk: its listbox hard-crashed
-// the renderer in an embedded-Chromium environment during testing, and all the
-// filtering here is custom anyway — this drops the dependency entirely.
 export function SearchDialog() {
   const open = useUIStore((s) => s.searchOpen)
   const setOpen = useUIStore((s) => s.setSearchOpen)
@@ -50,9 +47,6 @@ export function SearchDialog() {
     categories: Category[]
   } | null>(null)
 
-  // Lazy-load the catalog the first time the palette opens, via the API — the
-  // product array no longer ships in the global bundle through this
-  // layout-level component.
   React.useEffect(() => {
     if (!open || catalog) return
     let active = true
@@ -158,7 +152,6 @@ export function SearchDialog() {
   const flatItems = React.useMemo(() => sections.flatMap((s) => s.items), [sections])
 
   React.useEffect(() => {
-    // Selection follows the query: reset highlight to the first result.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setActiveIndex(0)
   }, [query])

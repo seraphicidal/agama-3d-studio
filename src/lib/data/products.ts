@@ -22,10 +22,6 @@ const COLORS = {
   ],
 }
 
-// Fixed anchor for all relative mock dates. Using Date.now() here caused a real
-// hydration bug: this module evaluates in both the server and client bundles, and
-// products sharing the same `daysAgo` (e.g. two at 60) flipped sort order whenever
-// the two evaluations landed across a millisecond boundary.
 export const MOCK_NOW = Date.parse("2026-07-18T12:00:00Z")
 
 interface ProductSeed {
@@ -52,7 +48,6 @@ interface ProductSeed {
   license?: "personal" | "commercial"
   size: { width: number; height: number; depth: number }
   weight: number
-  /** Units available; omit for the default in-stock quantity. Set 0 for sold out. */
   stock?: number
   daysAgo: number
 }
@@ -75,10 +70,6 @@ function buildProduct(seed: ProductSeed): Product {
     images: Array.from({ length: seed.images ?? 4 }, (_, i) =>
       productImage(seed.id, i)
     ),
-    // Ratings/reviews are earned from real, purchase-verified reviews — none
-    // exist pre-launch. Displaying fabricated ratings breaches the EU Omnibus
-    // Directive, so these stay 0 until a real reviews table lands.
-    // seed.rating / seed.reviewCount are intentionally ignored (kept for backfill).
     rating: 0,
     reviewCount: 0,
     variants: {
@@ -715,8 +706,6 @@ export interface ProductQuery {
   limit?: number
 }
 
-// Single query seam shared by the API routes (and later the real DB layer —
-// swap the body for a Supabase query without touching callers).
 export function queryProducts({ categoryId, q, sort = "newest", limit }: ProductQuery) {
   let list = products.filter((p) => {
     if (categoryId && !p.categoryIds.includes(categoryId)) return false

@@ -3,8 +3,6 @@ import { z } from "zod"
 import { queryProducts } from "@/lib/data/products"
 import { getCategoryBySlug } from "@/lib/data/categories"
 
-// Validate + coerce query params at the trust boundary. Unknown params are
-// stripped (lenient); malformed known params return 400 with per-field detail.
 const querySchema = z.object({
   kategoria: z.string().trim().min(1).optional(),
   q: z.string().trim().max(100).optional(),
@@ -14,11 +12,6 @@ const querySchema = z.object({
   limit: z.coerce.number().int().positive().max(100).optional(),
 })
 
-/**
- * GET /api/products?kategoria=<slug>&q=<text>&sort=<ProductSort>&limit=<n>
- * Serves the mock catalog today; the response shape is what the Supabase-backed
- * implementation will keep returning.
- */
 export function GET(request: NextRequest) {
   const parsed = querySchema.safeParse(
     Object.fromEntries(request.nextUrl.searchParams)

@@ -88,7 +88,6 @@ export interface Product {
   printTimeHours: number
   deliveryDaysMin: number
   deliveryDaysMax: number
-  /** Units available. `inStock` is derived from this (> 0). */
   stock: number
   inStock: boolean
   trending?: boolean

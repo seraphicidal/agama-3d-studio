@@ -1,11 +1,5 @@
--- Agama 3D Studio — initial schema.
--- Apply locally with `supabase db reset` (runs migrations + seed) or push to a
--- linked cloud project with `supabase db push`.
-
 create extension if not exists "uuid-ossp";
 
--- ============================================================ profiles
--- Extends Supabase auth.users; a row is created automatically on signup.
 create table public.profiles (
   id         uuid primary key references auth.users(id) on delete cascade,
   name       text,
@@ -34,17 +28,15 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
 
--- ============================================================ categories
 create table public.categories (
-  id          text primary key,          -- stable id ("dragons")
-  slug        text not null unique,       -- URL slug ("draci")
+  id          text primary key,
+  slug        text not null unique,
   name        text not null,
   description text not null default '',
   image_url   text,
   created_at  timestamptz not null default now()
 );
 
--- ============================================================ products
 create table public.products (
   id                text primary key,
   slug              text not null unique,
@@ -74,7 +66,6 @@ create table public.products (
   created_at        timestamptz not null default now()
 );
 
--- in_stock is derived from stock; expose it as a generated column for queries.
 alter table public.products
   add column in_stock boolean generated always as (stock > 0) stored;
 
@@ -91,11 +82,10 @@ create table public.product_images (
   position   integer not null default 0
 );
 
--- ============================================================ orders
 create table public.orders (
   id                uuid primary key default uuid_generate_v4(),
   number            text not null unique,
-  user_id           uuid references public.profiles(id),   -- null = guest order
+  user_id           uuid references public.profiles(id),
   email             text not null,
   customer_name     text not null default '',
   status            text not null default 'processing'
@@ -106,13 +96,13 @@ create table public.orders (
   discount_cents    integer not null default 0,
   shipping_cents    integer not null default 0,
   shipping_method   text,
-  vat_rate          numeric(4,3),                          -- e.g. 0.230
-  vat_cents         integer,                               -- VAT portion (prices are VAT-inclusive)
-  net_cents         integer,                               -- total − VAT
+  vat_rate          numeric(4,3),
+  vat_cents         integer,
+  net_cents         integer,
   total_cents       integer not null,
   address           jsonb not null,
   payment_provider  text,
-  payment_reference text unique,                           -- Stripe payment_intent / session id
+  payment_reference text unique,
   created_at        timestamptz not null default now(),
   updated_at        timestamptz not null default now()
 );
@@ -121,9 +111,9 @@ create table public.order_items (
   id               uuid primary key default uuid_generate_v4(),
   order_id         uuid not null references public.orders(id) on delete cascade,
   product_id       text references public.products(id),
-  name             text not null,                -- denormalized snapshot
-  variant          text not null default '',     -- "PLA · Čierna · M"
-  price_cents      integer not null,             -- unit price (VAT-inclusive)
+  name             text not null,
+  variant          text not null default '',
+  price_cents      integer not null,
   quantity         integer not null check (quantity > 0),
   line_total_cents integer not null default 0,
   vat_rate         numeric(4,3),
@@ -131,7 +121,6 @@ create table public.order_items (
   net_cents        integer
 );
 
--- ============================================================ reviews
 create table public.reviews (
   id         uuid primary key default uuid_generate_v4(),
   product_id text not null references public.products(id) on delete cascade,
@@ -144,9 +133,6 @@ create table public.reviews (
   created_at timestamptz not null default now()
 );
 
--- ============================================================ files
--- Custom-order uploads (STL/OBJ/3MF). Binary lives in the "custom-models"
--- Storage bucket; this table is the metadata index.
 create table public.files (
   id           uuid primary key default uuid_generate_v4(),
   user_id      uuid references public.profiles(id),
@@ -158,7 +144,6 @@ create table public.files (
   created_at   timestamptz not null default now()
 );
 
--- ============================================================ indexes
 create index products_created_idx     on public.products (created_at desc);
 create index product_categories_c_idx on public.product_categories (category_id);
 create index orders_user_idx          on public.orders (user_id);

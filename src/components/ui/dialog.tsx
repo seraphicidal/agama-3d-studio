@@ -8,10 +8,6 @@ import { Button } from "@/components/ui/button"
 import { XIcon } from "lucide-react"
 
 function Dialog({ ...props }: DialogPrimitive.Root.Props) {
-  // Controlled dialogs hard-unmount when closed. Waiting on exit-animation
-  // completion events proved unreliable (popup + click-blocking overlay could
-  // stay mounted forever); React removing the subtree cannot get stuck.
-  // Uncontrolled (trigger-based) usage passes no `open` and is unaffected.
   if (props.open === false) return null
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
 }
@@ -36,10 +32,6 @@ function DialogOverlay({
     <DialogPrimitive.Backdrop
       data-slot="dialog-overlay"
       className={cn(
-        // Entry transition only. NO exit styles on purpose: Base UI delays
-        // unmount until exit animations finish, and completion events proved
-        // unreliable (popup stuck open — an invisible overlay then blocks all
-        // clicks). With no exit animation the popup unmounts synchronously.
         "fixed inset-0 isolate z-50 bg-black/10 transition-opacity duration-150 supports-backdrop-filter:backdrop-blur-xs data-starting-style:opacity-0",
         className
       )}

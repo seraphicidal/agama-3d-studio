@@ -55,8 +55,6 @@ export function ProductCard({
       transition={{ type: "spring", stiffness: 300, damping: 24 }}
       className="group relative"
     >
-      {/* Stretched link keeps the whole card clickable without nesting the
-          action <button>s inside an <a> (invalid HTML + a11y problem). */}
       <Link
         href={`/modely/${product.slug}`}
         aria-label={product.name}
